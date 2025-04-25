@@ -1,0 +1,16 @@
+{
+    "name": "com.shingotabuchi.framework",
+    "version": "1.0.0",
+    "displayName": "Tabuchi Framework",
+    "description": "yeaboi",
+    "unity": "2022.3",
+    "keywords": [
+        "shingotabuchi",
+        "shingo",
+        "tabuchi"
+    ],
+    "author": {
+        "name": "Shingo Tabuchi",
+        "url": "https://github.com/shingotabuchi"
+    }
+}
