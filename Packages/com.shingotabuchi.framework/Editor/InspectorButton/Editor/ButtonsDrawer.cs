@@ -1,4 +1,4 @@
-﻿namespace EditorCools.Editor
+﻿namespace Fwk.Editor
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -38,10 +38,10 @@
         {
             foreach (var buttonGroup in ButtonGroups)
             {
-                if(buttonGroup.Count() > 0)
+                if (buttonGroup.Count() > 0)
                 {
                     var space = buttonGroup.First().ButtonAttribute.Space;
-                    if(space != 0) EditorGUILayout.Space(space);
+                    if (space != 0) EditorGUILayout.Space(space);
                 }
                 using (new EditorGUILayout.HorizontalScope())
                 {

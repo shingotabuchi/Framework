@@ -1,4 +1,4 @@
-﻿namespace EditorCools.Editor
+﻿namespace Fwk.Editor
 {
     using System.Reflection;
     using System.Collections.Generic;

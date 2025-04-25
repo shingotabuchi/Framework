@@ -1,4 +1,4 @@
-﻿namespace EditorCools
+﻿namespace Fwk.Editor
 {
     using System;
 

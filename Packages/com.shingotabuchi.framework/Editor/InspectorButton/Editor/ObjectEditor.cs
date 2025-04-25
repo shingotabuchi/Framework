@@ -1,4 +1,4 @@
-﻿namespace EditorCools.Editor
+﻿namespace Fwk.Editor
 {
     using UnityEditor;
     using Object = UnityEngine.Object;
