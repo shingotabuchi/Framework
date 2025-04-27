@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEditor;
@@ -15,9 +14,9 @@ namespace Fwk.Editor
     {
         private const string FolderToScan = "Assets/AddressableResources";
         private const string DefaultGroupName = "Default Local Group";
+        private const string SettingsAssetPath = "Assets/AddressableAssetsData/AddressableAssetSettings.asset";
+        private const string BackupAssetPath = "Assets/AddressableAssetsData/AddressableAssetSettings_Backup.asset";
 
-        private static List<GroupBackup> backupGroups;
-        private static bool isPlayModeChange = false;
 
         static AddressableFolderAutoAssign()
         {
@@ -25,86 +24,42 @@ namespace Fwk.Editor
             {
                 if (state == PlayModeStateChange.ExitingEditMode)
                 {
-                    BackupGroups();
+                    BackupSettingsFile();
                     AssignAddressables();
-                    isPlayModeChange = true;
                 }
-                else if (state == PlayModeStateChange.EnteredEditMode && isPlayModeChange)
+                else if (state == PlayModeStateChange.ExitingPlayMode)
                 {
-                    RestoreGroups();
-                    isPlayModeChange = false;
+                    RestoreSettingsFile();
                 }
             };
         }
 
-        private static void BackupGroups()
+        private static void BackupSettingsFile()
         {
-            var settings = AddressableAssetSettingsDefaultObject.Settings;
-            if (settings == null) return;
-
-            backupGroups = new List<GroupBackup>();
-
-            foreach (var group in settings.groups)
+            if (File.Exists(SettingsAssetPath))
             {
-                if (group == null) continue;
-
-                var entries = group.entries.Select(e => new EntryBackup
-                {
-                    guid = e.guid,
-                    address = e.address,
-                    labels = e.labels.ToList()
-                }).ToList();
-
-                backupGroups.Add(new GroupBackup
-                {
-                    groupName = group.Name,
-                    entries = entries
-                });
+                File.Copy(SettingsAssetPath, BackupAssetPath, overwrite: true);
+                Debug.Log("[AddressableFolderAutoAssign] Backed up AddressableAssetSettings.asset.");
             }
-
-            Debug.Log("[AddressableFolderAutoAssign] Groups backed up.");
         }
 
-        private static void RestoreGroups()
+        private static void RestoreSettingsFile()
         {
-            var settings = AddressableAssetSettingsDefaultObject.Settings;
-            if (settings == null || backupGroups == null) return;
-
-            // Delete all non-null groups
-            foreach (var group in settings.groups.ToList())
+            if (File.Exists(BackupAssetPath))
             {
-                if (group != null && group != settings.DefaultGroup)
+                if (File.Exists(SettingsAssetPath))
                 {
-                    settings.RemoveGroup(group);
+                    File.Delete(SettingsAssetPath);
                 }
+                File.Move(BackupAssetPath, SettingsAssetPath);
+                File.Delete(BackupAssetPath);
+                AssetDatabase.Refresh();
+                Debug.Log("[AddressableFolderAutoAssign] Restored AddressableAssetSettings.asset to original state.");
             }
-
-            var entries = settings.DefaultGroup.entries.ToList();
-            foreach (var entry in entries)
+            else
             {
-                settings.DefaultGroup.RemoveAssetEntry(entry);
+                Debug.LogWarning("[AddressableFolderAutoAssign] No backup found to restore!");
             }
-            // Restore backup
-            foreach (var groupBackup in backupGroups)
-            {
-                var group = groupBackup.groupName == DefaultGroupName
-                          ? settings.DefaultGroup
-                          : settings.FindGroup(groupBackup.groupName) ?? settings.CreateGroup(groupBackup.groupName, false, false, false, settings.DefaultGroup.Schemas.ToList());
-
-                foreach (var entryBackup in groupBackup.entries)
-                {
-                    var entry = settings.CreateOrMoveEntry(entryBackup.guid, group, false, false);
-                    entry.address = entryBackup.address;
-                    foreach (var label in entryBackup.labels)
-                    {
-                        entry.SetLabel(label, true, true);
-                    }
-                }
-            }
-
-            settings.SetDirty(AddressableAssetSettings.ModificationEvent.BatchModification, null, true);
-            AssetDatabase.SaveAssets();
-            Debug.Log("[AddressableFolderAutoAssign] Groups restored after Play Mode.");
         }
 
         public static void AssignAddressables()
@@ -120,12 +75,12 @@ namespace Fwk.Editor
             var defaultSchemas = templateGroup.Schemas.ToList();
 
             var guids = AssetDatabase.FindAssets("", new[] { FolderToScan })
-                            .Where(g =>
-                            {
-                                var p = AssetDatabase.GUIDToAssetPath(g);
-                                return !AssetDatabase.IsValidFolder(p);
-                            })
-                            .ToArray();
+                .Where(g =>
+                {
+                    var p = AssetDatabase.GUIDToAssetPath(g);
+                    return !AssetDatabase.IsValidFolder(p);
+                })
+                .ToArray();
 
             foreach (var guid in guids)
             {
@@ -133,36 +88,19 @@ namespace Fwk.Editor
                 var rel = path.Substring(FolderToScan.Length).TrimStart('/');
                 var slash = rel.IndexOf('/');
                 var groupName = slash >= 0
-                              ? rel.Substring(0, slash)
-                              : DefaultGroupName;
+                    ? rel.Substring(0, slash)
+                    : DefaultGroupName;
 
                 var group = settings.FindGroup(groupName)
-                         ?? settings.CreateGroup(groupName,
-                                                 false,
-                                                 false,
-                                                 false,
-                                                 defaultSchemas);
+                    ?? settings.CreateGroup(groupName, false, false, false, defaultSchemas);
 
                 var entry = settings.CreateOrMoveEntry(guid, group, false, false);
                 entry.address = Path.GetFileNameWithoutExtension(path);
             }
 
             settings.SetDirty(AddressableAssetSettings.ModificationEvent.BatchModification, null, true);
-
-            Debug.Log($"[AddressableFolderAutoAssign] Assigned {guids.Length} assets (temporary for Play Mode only).");
-        }
-
-        private class GroupBackup
-        {
-            public string groupName;
-            public List<EntryBackup> entries;
-        }
-
-        private class EntryBackup
-        {
-            public string guid;
-            public string address;
-            public List<string> labels;
+            AssetDatabase.SaveAssets();
+            Debug.Log($"[AddressableFolderAutoAssign] Assigned {guids.Length} assets (temporary for Play Mode).");
         }
     }
 
@@ -173,6 +111,7 @@ namespace Fwk.Editor
         {
             AddressableFolderAutoAssign.AssignAddressables();
             AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
         }
     }
 }
