@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
+using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
@@ -15,7 +16,7 @@ namespace Fwk.Editor
         private const string FolderToScan = "Assets/AddressableResources";
         private const string DefaultGroupName = "Default Local Group";
         private const string SettingsAssetPath = "Assets/AddressableAssetsData/AddressableAssetSettings.asset";
-        private const string PlayModeSettingsPath = "Assets/AddressableAssetsData/Build/AddressableAssetSettings_PlayMode.asset";
+        private const string PlayModeSettingsPath = "Assets/AddressableAssetsData/Build/AddressableAssetSettings.asset";
         private const string BackupSettingsPath = "Assets/AddressableAssetsData/Build/AddressableAssetSettings_Backup.asset";
         private const string BackupSettingsMetaPath = BackupSettingsPath + ".meta";
 
@@ -145,6 +146,13 @@ namespace Fwk.Editor
 
                 var group = settings.FindGroup(groupName)
                     ?? settings.CreateGroup(groupName, false, false, false, defaultSchemas);
+
+                // Always overwrite BundleMode to PackSeparately
+                var bundleSchema = group.Schemas.OfType<BundledAssetGroupSchema>().FirstOrDefault();
+                if (bundleSchema != null)
+                {
+                    bundleSchema.BundleMode = BundledAssetGroupSchema.BundlePackingMode.PackSeparately;
+                }
 
                 var entry = settings.CreateOrMoveEntry(guid, group, false, false);
                 entry.address = Path.GetFileNameWithoutExtension(path);
