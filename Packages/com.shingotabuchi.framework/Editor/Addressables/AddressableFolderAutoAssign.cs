@@ -17,6 +17,7 @@ namespace Fwk.Editor
         private const string SettingsAssetPath = "Assets/AddressableAssetsData/AddressableAssetSettings.asset";
         private const string PlayModeSettingsPath = "Assets/AddressableAssetsData/Build/AddressableAssetSettings_PlayMode.asset";
         private const string BackupSettingsPath = "Assets/AddressableAssetsData/Build/AddressableAssetSettings_Backup.asset";
+        private const string BackupSettingsMetaPath = BackupSettingsPath + ".meta";
 
         static AddressableFolderAutoAssign()
         {
@@ -86,6 +87,10 @@ namespace Fwk.Editor
                 {
                     File.Delete(SettingsAssetPath);
                 }
+                if (File.Exists(BackupSettingsMetaPath))
+                {
+                    File.Delete(BackupSettingsMetaPath);
+                }
 
                 File.Move(BackupSettingsPath, SettingsAssetPath);
                 Debug.Log("[AddressableFolderAutoAssign] Restored AddressableAssetSettings.asset from backup.");
@@ -93,12 +98,6 @@ namespace Fwk.Editor
             else
             {
                 Debug.LogWarning("[AddressableFolderAutoAssign] No backup found to restore AddressableAssetSettings.asset.");
-            }
-
-            if (File.Exists(PlayModeSettingsPath))
-            {
-                File.Delete(PlayModeSettingsPath);
-                Debug.Log("[AddressableFolderAutoAssign] Deleted temporary Play Mode AddressableAssetSettings.");
             }
 
             AssetDatabase.Refresh();
