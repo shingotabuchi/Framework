@@ -15,8 +15,8 @@ namespace Fwk.Editor
         private const string FolderToScan = "Assets/AddressableResources";
         private const string DefaultGroupName = "Default Local Group";
         private const string SettingsAssetPath = "Assets/AddressableAssetsData/AddressableAssetSettings.asset";
-        private const string BackupAssetPath = "Assets/AddressableAssetsData/AddressableAssetSettings_Backup.asset";
-
+        private const string PlayModeSettingsPath = "Assets/AddressableAssetsData/Build/AddressableAssetSettings_PlayMode.asset";
+        private const string BackupSettingsPath = "Assets/AddressableAssetsData/Build/AddressableAssetSettings_Backup.asset";
 
         static AddressableFolderAutoAssign()
         {
@@ -24,41 +24,94 @@ namespace Fwk.Editor
             {
                 if (state == PlayModeStateChange.ExitingEditMode)
                 {
-                    BackupSettingsFile();
+                    BackupOriginalSettings();
+                    PreparePlayModeSettings();
                     AssignAddressables();
                 }
                 else if (state == PlayModeStateChange.ExitingPlayMode)
                 {
-                    RestoreSettingsFile();
+                    RestoreOriginalSettings();
                 }
             };
         }
 
-        private static void BackupSettingsFile()
+        private static void BackupOriginalSettings()
         {
             if (File.Exists(SettingsAssetPath))
             {
-                File.Copy(SettingsAssetPath, BackupAssetPath, overwrite: true);
+                var buildDir = Path.GetDirectoryName(BackupSettingsPath);
+                if (!Directory.Exists(buildDir))
+                {
+                    Directory.CreateDirectory(buildDir);
+                }
+
+                File.Copy(SettingsAssetPath, BackupSettingsPath, overwrite: true);
                 Debug.Log("[AddressableFolderAutoAssign] Backed up AddressableAssetSettings.asset.");
+            }
+            else
+            {
+                Debug.LogWarning("[AddressableFolderAutoAssign] No AddressableAssetSettings.asset found to backup.");
             }
         }
 
-        private static void RestoreSettingsFile()
+        private static void PreparePlayModeSettings()
         {
-            if (File.Exists(BackupAssetPath))
+            if (File.Exists(SettingsAssetPath))
+            {
+                File.Copy(SettingsAssetPath, PlayModeSettingsPath, overwrite: true);
+                AssetDatabase.Refresh();
+
+                var playModeSettings = AssetDatabase.LoadAssetAtPath<AddressableAssetSettings>(PlayModeSettingsPath);
+                if (playModeSettings != null)
+                {
+                    AddressableAssetSettingsDefaultObject.Settings = playModeSettings;
+                    Debug.Log("[AddressableFolderAutoAssign] Using Play Mode AddressableAssetSettings.");
+                }
+                else
+                {
+                    Debug.LogError("[AddressableFolderAutoAssign] Failed to load Play Mode AddressableAssetSettings.");
+                }
+            }
+            else
+            {
+                Debug.LogWarning("[AddressableFolderAutoAssign] No AddressableAssetSettings.asset found to prepare for Play Mode.");
+            }
+        }
+
+        private static void RestoreOriginalSettings()
+        {
+            if (File.Exists(BackupSettingsPath))
             {
                 if (File.Exists(SettingsAssetPath))
                 {
                     File.Delete(SettingsAssetPath);
                 }
-                File.Move(BackupAssetPath, SettingsAssetPath);
-                File.Delete(BackupAssetPath);
-                AssetDatabase.Refresh();
-                Debug.Log("[AddressableFolderAutoAssign] Restored AddressableAssetSettings.asset to original state.");
+
+                File.Move(BackupSettingsPath, SettingsAssetPath);
+                Debug.Log("[AddressableFolderAutoAssign] Restored AddressableAssetSettings.asset from backup.");
             }
             else
             {
-                Debug.LogWarning("[AddressableFolderAutoAssign] No backup found to restore!");
+                Debug.LogWarning("[AddressableFolderAutoAssign] No backup found to restore AddressableAssetSettings.asset.");
+            }
+
+            if (File.Exists(PlayModeSettingsPath))
+            {
+                File.Delete(PlayModeSettingsPath);
+                Debug.Log("[AddressableFolderAutoAssign] Deleted temporary Play Mode AddressableAssetSettings.");
+            }
+
+            AssetDatabase.Refresh();
+
+            var originalSettings = AssetDatabase.LoadAssetAtPath<AddressableAssetSettings>(SettingsAssetPath);
+            if (originalSettings != null)
+            {
+                AddressableAssetSettingsDefaultObject.Settings = originalSettings;
+                Debug.Log("[AddressableFolderAutoAssign] Restored original AddressableAssetSettings.");
+            }
+            else
+            {
+                Debug.LogWarning("[AddressableFolderAutoAssign] No original AddressableAssetSettings found to restore.");
             }
         }
 
@@ -100,13 +153,14 @@ namespace Fwk.Editor
 
             settings.SetDirty(AddressableAssetSettings.ModificationEvent.BatchModification, null, true);
             AssetDatabase.SaveAssets();
-            Debug.Log($"[AddressableFolderAutoAssign] Assigned {guids.Length} assets (temporary for Play Mode).");
+            Debug.Log($"[AddressableFolderAutoAssign] Assigned {guids.Length} assets (temporary Play Mode only).");
         }
     }
 
     public class AddressableFolderAutoAssignBuildProcessor : IPreprocessBuildWithReport
     {
         public int callbackOrder => 0;
+
         public void OnPreprocessBuild(BuildReport report)
         {
             AddressableFolderAutoAssign.AssignAddressables();
