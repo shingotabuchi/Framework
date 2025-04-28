@@ -23,7 +23,9 @@ namespace Fwk.Editor
         private const string BuildSettingsPath = BuildPath + "/AddressableAssetSettings.asset";
         private const string BuildSettingsMetaPath = BuildSettingsPath + ".meta";
         private const string BackupSettingsPath = BuildPath + "/AddressableAssetSettings_Backup.asset";
+        private const string BackupSettingsMetaPath = BackupSettingsPath + ".meta";
         private const string BackupSortSettingsPath = BuildPath + "/AddressableAssetGroupSortSettings_Backup.asset";
+        private const string BackupSortSettingsMetaPath = BackupSortSettingsPath + ".meta";
 
         static AddressableFolderAutoAssign()
         {
@@ -110,7 +112,7 @@ namespace Fwk.Editor
                 {
                     File.Delete(SettingsAssetPath);
                 }
-
+                File.Delete(BackupSettingsMetaPath);
                 File.Move(BackupSettingsPath, SettingsAssetPath);
                 Debug.Log("[AddressableFolderAutoAssign] Restored AddressableAssetSettings.asset from backup.");
             }
@@ -125,7 +127,7 @@ namespace Fwk.Editor
                 {
                     File.Delete(SortSettingsAssetPath);
                 }
-
+                File.Delete(BackupSortSettingsMetaPath);
                 File.Move(BackupSortSettingsPath, SortSettingsAssetPath);
                 Debug.Log("[AddressableFolderAutoAssign] Restored AddressableAssetGroupSortSettings.asset from backup.");
             }
