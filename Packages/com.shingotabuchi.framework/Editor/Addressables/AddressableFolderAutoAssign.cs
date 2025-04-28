@@ -134,14 +134,8 @@ namespace Fwk.Editor
                 Debug.LogWarning("[AddressableFolderAutoAssign] No backup found to restore AddressableAssetGroupSortSettings.asset.");
             }
 
-            if (Directory.Exists(BuildPath))
-            {
-                Directory.Delete(BuildPath, true);
-            }
-            if (File.Exists(BuildPathMeta))
-            {
-                File.Delete(BuildPathMeta);
-            }
+            File.Delete(BuildSettingsPath);
+            File.Delete(BuildSettingsMetaPath);
 
             AssetDatabase.Refresh();
 
@@ -223,30 +217,6 @@ namespace Fwk.Editor
             settings.SetDirty(AddressableAssetSettings.ModificationEvent.BatchModification, null, true);
             AssetDatabase.SaveAssets();
             Debug.Log($"[AddressableFolderAutoAssign] Assigned {guids.Length} assets (temporary Play Mode only).");
-        }
-    }
-
-    public class AddressableFolderAutoAssignBuildProcessor : IPreprocessBuildWithReport
-    {
-        public int callbackOrder => 0;
-
-        public void OnPreprocessBuild(BuildReport report)
-        {
-            AddressableFolderAutoAssign.BackupOriginalSettings();
-            AddressableFolderAutoAssign.PrepareBuildSettings();
-            AddressableFolderAutoAssign.AssignAddressables();
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-        }
-    }
-
-    public class AddressableFolderAutoAssignPostBuildProcessor : IPostprocessBuildWithReport
-    {
-        public int callbackOrder => 0;
-
-        public void OnPostprocessBuild(BuildReport report)
-        {
-            AddressableFolderAutoAssign.RestoreOriginalSettings();
         }
     }
 }
