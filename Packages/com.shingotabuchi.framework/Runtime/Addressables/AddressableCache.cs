@@ -11,7 +11,7 @@ namespace Fwk
 
         public async UniTask<T> LoadAsync<T>(string key, IProgress<float> progress = null) where T : UnityEngine.Object
         {
-            if (_handles.TryGetValue(key, out var boxedHandle) && boxedHandle is IAssetHandle<T> existingHandle)
+            if (_handles.TryGetValue(key, out var boxedHandle) && boxedHandle is AddressableHandle<T> existingHandle)
             {
                 return existingHandle.Asset;
             }
@@ -26,11 +26,9 @@ namespace Fwk
         {
             if (_handles.TryGetValue(key, out var boxedHandle))
             {
-                switch (boxedHandle)
+                if (boxedHandle is AddressableHandle<UnityEngine.Object> handle)
                 {
-                    case IAssetHandle<UnityEngine.Object> handle:
-                        handle.Release();
-                        break;
+                    handle.Release();
                 }
                 _handles.Remove(key);
             }
@@ -40,7 +38,7 @@ namespace Fwk
         {
             foreach (var boxedHandle in _handles.Values)
             {
-                if (boxedHandle is IAssetHandle<UnityEngine.Object> handle)
+                if (boxedHandle is AddressableHandle<UnityEngine.Object> handle)
                 {
                     handle.Release();
                 }

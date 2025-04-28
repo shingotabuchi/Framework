@@ -4,7 +4,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace Fwk
 {
-    public class AddressableHandle<T> : IAssetHandle<T> where T : UnityEngine.Object
+    public class AddressableHandle<T> where T : UnityEngine.Object
     {
         private readonly AsyncOperationHandle<T> _handle;
 
