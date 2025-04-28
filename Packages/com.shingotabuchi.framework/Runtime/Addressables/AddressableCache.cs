@@ -1,15 +1,17 @@
 using System;
-using System.Threading;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using Cysharp.Threading.Tasks;
 
 namespace Fwk
 {
-    public class AddressableCache
+    public class AddressableCache : IDisposable
     {
         private readonly Dictionary<string, object> _handles = new();
         private readonly Dictionary<string, UniTask> _loadingTasks = new();
+        private CancellationTokenSource _disposeCts = new();
+        private bool _isDisposed = false;
 
         public async UniTask<T> LoadAsync<T>(
             string key,
@@ -17,6 +19,13 @@ namespace Fwk
             CancellationToken cancellationToken = default
         ) where T : UnityEngine.Object
         {
+            if (_isDisposed)
+            {
+                throw new ObjectDisposedException(nameof(AddressableCache));
+            }
+
+            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _disposeCts.Token);
+
             while (true)
             {
                 if (TryGetHandle<T>(key, out AddressableHandle<T> handle))
@@ -58,6 +67,7 @@ namespace Fwk
                     {
                         Debug.LogWarning($"Key '{key}' was canceled. Releasing the existing handle.");
                         existingHandle.Release();
+                        _handles.Remove(key);
                     }
                     throw;
                 }
@@ -79,7 +89,7 @@ namespace Fwk
 
             async UniTask LoadAsyncInternal()
             {
-                var newHandle = await AddressableManager.LoadAsync<T>(key, progress, cancellationToken);
+                var newHandle = await AddressableManager.LoadAsync<T>(key, progress, linkedCts.Token);
 
                 if (TryGetHandle<T>(key, out var existingHandle))
                 {
@@ -133,6 +143,20 @@ namespace Fwk
                 }
             }
             _handles.Clear();
+        }
+
+        public void Dispose()
+        {
+            if (_isDisposed) return;
+
+            _isDisposed = true;
+
+            _disposeCts?.Cancel();
+            _disposeCts?.Dispose();
+            _disposeCts = null;
+
+            ReleaseAll();
+            _loadingTasks.Clear();
         }
     }
 }
