@@ -16,8 +16,10 @@ namespace Fwk.Editor
         private const string FolderToScan = "Assets/AddressableResources";
         private const string DefaultGroupName = "Default Local Group";
         private const string SettingsAssetPath = "Assets/AddressableAssetsData/AddressableAssetSettings.asset";
-        private const string PlayModeSettingsPath = "Assets/AddressableAssetsData/Build/AddressableAssetSettings.asset";
-        private const string BackupSettingsPath = "Assets/AddressableAssetsData/Build/AddressableAssetSettings_Backup.asset";
+        private const string BuildPath = "Assets/AddressableAssetsData/Build/";
+        private const string BuildGroupsPath = BuildPath + "AssetGroups/";
+        private const string PlayModeSettingsPath = BuildPath + "AddressableAssetSettings.asset";
+        private const string BackupSettingsPath = BuildPath + "AddressableAssetSettings_Backup.asset";
         private const string BackupSettingsMetaPath = BackupSettingsPath + ".meta";
 
         static AddressableFolderAutoAssign()
@@ -115,8 +117,22 @@ namespace Fwk.Editor
             }
         }
 
+        private static void CleanOldGroupsInBuild()
+        {
+            if (Directory.Exists(BuildGroupsPath))
+            {
+                var files = Directory.GetFiles(BuildGroupsPath, "*.asset", SearchOption.AllDirectories);
+
+                foreach (var file in files)
+                {
+                    AssetDatabase.DeleteAsset(file.Replace("\\", "/"));
+                }
+            }
+        }
+
         public static void AssignAddressables()
         {
+            CleanOldGroupsInBuild();
             var settings = AddressableAssetSettingsDefaultObject.Settings;
             if (settings == null)
             {
