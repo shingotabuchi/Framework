@@ -19,7 +19,7 @@ namespace Fwk
     {
         public static T Instance { get; private set; }
         public static bool Exists { get => Instance != null; }
-        public virtual void Awake()
+        protected virtual void Awake()
         {
             if (Instance == null)
             {
@@ -36,7 +36,7 @@ namespace Fwk
     {
         public static T Instance { get; private set; }
 
-        public virtual void Awake()
+        protected virtual void Awake()
         {
             if (Instance == null)
             {

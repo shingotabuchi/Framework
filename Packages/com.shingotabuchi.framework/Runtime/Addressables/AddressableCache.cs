@@ -16,8 +16,8 @@ namespace Fwk.Addressables
 
         public async UniTask<T> LoadAsync<T>(
             string key,
-            IProgress<float> progress = null,
-            CancellationToken cancellationToken = default
+            CancellationToken cancellationToken = default,
+            IProgress<float> progress = null
         ) where T : UnityEngine.Object
         {
             if (_isDisposed)

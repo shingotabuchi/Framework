@@ -7,6 +7,5 @@ namespace Fwk.Sound
         string Name { get; }
         AudioClip Clip { get; }
         float Volume { get; }
-        SoundType Type { get; }
     }
 }
