@@ -5,7 +5,9 @@ using Fwk.Addressables;
 
 public class SingleImageLoadTest : MonoBehaviour
 {
-    [SerializeField] private Button loadImageButton;
+    [SerializeField] private Button loadButton;
+    [SerializeField] private Button releaseButton;
+    [SerializeField] private Button resetButton;
     [SerializeField] private GameObject imagePrefab;
     [SerializeField] private Transform imageParent;
     [SerializeField] private string imageKey;
@@ -13,7 +15,9 @@ public class SingleImageLoadTest : MonoBehaviour
 
     private void Start()
     {
-        loadImageButton.onClick.AddListener(OnLoadImageButtonClicked);
+        loadButton.onClick.AddListener(OnLoadButtonClicked);
+        releaseButton.onClick.AddListener(OnReleaseButtonClicked);
+        resetButton.onClick.AddListener(OnResetButtonClicked);
     }
 
     private void OnDestroy()
@@ -21,12 +25,31 @@ public class SingleImageLoadTest : MonoBehaviour
         addressableCache.Dispose();
     }
 
-    private void OnLoadImageButtonClicked()
+    private void OnLoadButtonClicked()
     {
-        LoadImageAsync(imageKey).Forget();
+        LoadAsync(imageKey).Forget();
     }
 
-    private async UniTask LoadImageAsync(string key)
+    private void OnReleaseButtonClicked()
+    {
+        addressableCache.Release(imageKey);
+    }
+
+    private void OnResetButtonClicked()
+    {
+        addressableCache.Dispose();
+        addressableCache = new();
+        for (int i = 0; i < imageParent.childCount; i++)
+        {
+            var childObject = imageParent.GetChild(i).gameObject;
+            if (childObject != null && childObject != imagePrefab)
+            {
+                Destroy(childObject);
+            }
+        }
+    }
+
+    private async UniTask LoadAsync(string key)
     {
         var image = await addressableCache.LoadAsync<Sprite>(key);
         if (image != null)

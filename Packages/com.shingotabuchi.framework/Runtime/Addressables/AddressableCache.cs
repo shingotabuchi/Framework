@@ -9,7 +9,7 @@ namespace Fwk.Addressables
 {
     public class AddressableCache : IDisposable
     {
-        private readonly Dictionary<string, object> _handles = new();
+        private readonly Dictionary<string, IAddressableHandle> _handles = new();
         private readonly Dictionary<string, UniTask> _loadingTasks = new();
         private CancellationTokenSource _disposeCts = new();
         private bool _isDisposed = false;
@@ -29,18 +29,9 @@ namespace Fwk.Addressables
 
             while (true)
             {
-                if (TryGetHandle<T>(key, out AddressableHandle<T> handle))
+                if (TryGetHandle(key, out var handle))
                 {
-                    if (handle.Asset != null)
-                    {
-                        return handle.Asset;
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"Asset of key '{key}' is null. Releasing the handle.");
-                        handle.Release();
-                        _handles.Remove(key);
-                    }
+                    return handle.Asset as T;
                 }
 
                 if (_loadingTasks.TryGetValue(key, out var loadingTask))
@@ -64,12 +55,7 @@ namespace Fwk.Addressables
                 }
                 catch (OperationCanceledException)
                 {
-                    if (TryGetHandle<T>(key, out var existingHandle))
-                    {
-                        Debug.LogWarning($"Key '{key}' was canceled. Releasing the existing handle.");
-                        existingHandle.Release();
-                        _handles.Remove(key);
-                    }
+                    TryReleaseHandle(key);
                     throw;
                 }
                 finally
@@ -77,9 +63,9 @@ namespace Fwk.Addressables
                     _loadingTasks.Remove(key);
                 }
 
-                if (TryGetHandle<T>(key, out var loadedHandle))
+                if (TryGetHandle(key, out var loadedHandle))
                 {
-                    return loadedHandle.Asset;
+                    return loadedHandle.Asset as T;
                 }
                 else
                 {
@@ -100,7 +86,7 @@ namespace Fwk.Addressables
                         throw new Exception($"Failed to load asset of key '{key}'.");
                     }
 
-                    if (TryGetHandle<T>(key, out var existingHandle))
+                    if (TryGetHandle(key, out var _))
                     {
                         Debug.LogWarning($"Key '{key}' already exists in the cache. Releasing the new handle.");
                         newHandle.Release();
@@ -112,64 +98,61 @@ namespace Fwk.Addressables
                 }
                 catch (OperationCanceledException)
                 {
-                    if (TryGetHandle<T>(key, out var existingHandle))
-                    {
-                        existingHandle.Release();
-                        _handles.Remove(key);
-                    }
+                    TryReleaseHandle(key);
                     throw;
                 }
                 catch (Exception ex)
                 {
-                    if (TryGetHandle<T>(key, out var existingHandle))
-                    {
-                        existingHandle.Release();
-                        _handles.Remove(key);
-                    }
+                    TryReleaseHandle(key);
                     Debug.LogError($"Failed to load asset of key '{key}': {ex}");
                     throw;
                 }
             }
         }
 
-        private bool TryGetHandle<T>(string key, out AddressableHandle<T> handle) where T : UnityEngine.Object
+        private bool TryGetHandle(string key, out IAddressableHandle handle)
         {
             if (_handles.TryGetValue(key, out var boxedHandle))
             {
-                if (boxedHandle is AddressableHandle<T> existingHandle)
-                {
-                    handle = existingHandle;
-                    return true;
-                }
-                else
-                {
-                    Debug.LogError($"Handle of Key '{key}' is of a different type. Cannot cast to {typeof(T)}.");
-                }
+                handle = boxedHandle;
+                return true;
             }
             handle = null;
             return false;
         }
 
+        private bool TryReleaseHandle(string key)
+        {
+            if (TryGetHandle(key, out var handle))
+            {
+                handle.Release();
+                _handles.Remove(key);
+                return true;
+            }
+            else
+            {
+                Debug.LogWarning($"No handle found for key '{key}'. Cannot release.");
+            }
+            return false;
+        }
+
         public void Release(string key)
         {
-            if (_handles.TryGetValue(key, out var boxedHandle))
+            if (TryReleaseHandle(key))
             {
-                if (boxedHandle is AddressableHandle<UnityEngine.Object> handle)
-                {
-                    handle.Release();
-                }
-                _handles.Remove(key);
+                Debug.Log($"Released handle for key '{key}'.");
+            }
+            else
+            {
+                Debug.LogWarning($"No handle found for key '{key}'.");
             }
         }
 
         public void ReleaseAll()
         {
-            foreach (var boxedHandle in _handles.Values)
+            foreach (var handle in _handles.Values)
             {
-                if (boxedHandle is AddressableHandle<UnityEngine.Object> handle)
-                {
-                    handle.Release();
-                }
+                handle.Release();
             }
             _handles.Clear();
         }
