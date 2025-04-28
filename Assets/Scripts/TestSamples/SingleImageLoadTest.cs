@@ -7,6 +7,7 @@ public class SingleImageLoadTest : MonoBehaviour
 {
     [SerializeField] private Button loadButton;
     [SerializeField] private Button releaseButton;
+    [SerializeField] private Button clearButton;
     [SerializeField] private Button disposeButton;
     [SerializeField] private Button resetButton;
     [SerializeField] private GameObject imagePrefab;
@@ -18,6 +19,7 @@ public class SingleImageLoadTest : MonoBehaviour
     {
         loadButton.onClick.AddListener(OnLoadButtonClicked);
         releaseButton.onClick.AddListener(OnReleaseButtonClicked);
+        clearButton.onClick.AddListener(OnClearButtonClicked);
         disposeButton.onClick.AddListener(OnDisposeButtonClicked);
         resetButton.onClick.AddListener(OnResetButtonClicked);
     }
@@ -41,6 +43,18 @@ public class SingleImageLoadTest : MonoBehaviour
     {
         addressableCache.Dispose();
         addressableCache = new();
+    }
+
+    private void OnClearButtonClicked()
+    {
+        for (int i = 0; i < imageParent.childCount; i++)
+        {
+            var image = imageParent.GetChild(i).GetComponent<Image>();
+            if (image != null)
+            {
+                image.sprite = null;
+            }
+        }
     }
 
     private void OnResetButtonClicked()

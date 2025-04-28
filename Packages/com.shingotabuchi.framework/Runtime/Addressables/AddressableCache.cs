@@ -9,8 +9,8 @@ namespace Fwk.Addressables
 {
     public class AddressableCache : IDisposable
     {
-        private readonly Dictionary<string, IAddressableHandle> _handles = new();
-        private readonly Dictionary<string, UniTask> _loadingTasks = new();
+        private Dictionary<string, IAddressableHandle> _handles = new();
+        private Dictionary<string, UniTask> _loadingTasks = new();
         private CancellationTokenSource _disposeCts = new();
         private bool _isDisposed = false;
 
@@ -168,7 +168,10 @@ namespace Fwk.Addressables
             _disposeCts = null;
 
             ReleaseAll();
+            _handles = null;
+
             _loadingTasks.Clear();
+            _loadingTasks = null;
         }
     }
 }
