@@ -16,13 +16,14 @@ namespace Fwk.Editor
         private const string ResourceFolder = "Assets/AddressableResources";
         private const string DefaultGroupName = "Default Local Group";
         private const string SettingsAssetPath = "Assets/AddressableAssetsData/AddressableAssetSettings.asset";
+        private const string SortSettingsAssetPath = "Assets/AddressableAssetsData/AddressableAssetGroupSortSettings.asset";
         private const string BuildPath = "Assets/AddressableAssetsData/Build";
         private const string BuildPathMeta = BuildPath + ".meta";
         private const string BuildGroupsPath = BuildPath + "/AssetGroups/";
         private const string PlayModeSettingsPath = BuildPath + "/AddressableAssetSettings.asset";
         private const string PlayModeSettingsMetaPath = PlayModeSettingsPath + ".meta";
         private const string BackupSettingsPath = BuildPath + "/AddressableAssetSettings_Backup.asset";
-        private const string BackupSettingsMetaPath = BackupSettingsPath + ".meta";
+        private const string BackupSortSettingsPath = BuildPath + "/AddressableAssetGroupSortSettings_Backup.asset";
 
         static AddressableFolderAutoAssign()
         {
@@ -58,12 +59,28 @@ namespace Fwk.Editor
             {
                 Debug.LogWarning("[AddressableFolderAutoAssign] No AddressableAssetSettings.asset found to backup.");
             }
+
+            if (File.Exists(SortSettingsAssetPath))
+            {
+                File.Copy(SortSettingsAssetPath, BackupSortSettingsPath, overwrite: true);
+                Debug.Log("[AddressableFolderAutoAssign] Backed up AddressableAssetGroupSortSettings.asset.");
+            }
+            else
+            {
+                Debug.LogWarning("[AddressableFolderAutoAssign] No AddressableAssetGroupSortSettings.asset found to backup.");
+            }
         }
 
         private static void PreparePlayModeSettings()
         {
             if (File.Exists(SettingsAssetPath))
             {
+                var buildDir = Path.GetDirectoryName(PlayModeSettingsPath);
+                if (!Directory.Exists(buildDir))
+                {
+                    Directory.CreateDirectory(buildDir);
+                }
+
                 File.Copy(SettingsAssetPath, PlayModeSettingsPath, overwrite: true);
                 AssetDatabase.Refresh();
 
@@ -100,6 +117,21 @@ namespace Fwk.Editor
             else
             {
                 Debug.LogWarning("[AddressableFolderAutoAssign] No backup found to restore AddressableAssetSettings.asset.");
+            }
+
+            if (File.Exists(BackupSortSettingsPath))
+            {
+                if (File.Exists(SortSettingsAssetPath))
+                {
+                    File.Delete(SortSettingsAssetPath);
+                }
+
+                File.Move(BackupSortSettingsPath, SortSettingsAssetPath);
+                Debug.Log("[AddressableFolderAutoAssign] Restored AddressableAssetGroupSortSettings.asset from backup.");
+            }
+            else
+            {
+                Debug.LogWarning("[AddressableFolderAutoAssign] No backup found to restore AddressableAssetGroupSortSettings.asset.");
             }
 
             if (Directory.Exists(BuildPath))
