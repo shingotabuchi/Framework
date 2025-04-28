@@ -7,6 +7,7 @@ public class SingleImageLoadTest : MonoBehaviour
 {
     [SerializeField] private Button loadButton;
     [SerializeField] private Button releaseButton;
+    [SerializeField] private Button disposeButton;
     [SerializeField] private Button resetButton;
     [SerializeField] private GameObject imagePrefab;
     [SerializeField] private Transform imageParent;
@@ -17,6 +18,7 @@ public class SingleImageLoadTest : MonoBehaviour
     {
         loadButton.onClick.AddListener(OnLoadButtonClicked);
         releaseButton.onClick.AddListener(OnReleaseButtonClicked);
+        disposeButton.onClick.AddListener(OnDisposeButtonClicked);
         resetButton.onClick.AddListener(OnResetButtonClicked);
     }
 
@@ -33,6 +35,12 @@ public class SingleImageLoadTest : MonoBehaviour
     private void OnReleaseButtonClicked()
     {
         addressableCache.Release(imageKey);
+    }
+
+    private void OnDisposeButtonClicked()
+    {
+        addressableCache.Dispose();
+        addressableCache = new();
     }
 
     private void OnResetButtonClicked()
