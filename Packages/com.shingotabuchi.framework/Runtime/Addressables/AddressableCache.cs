@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Collections.Generic;
 using UnityEngine;
 using Cysharp.Threading.Tasks;
@@ -9,14 +10,18 @@ namespace Fwk
     {
         private readonly Dictionary<string, object> _handles = new();
 
-        public async UniTask<T> LoadAsync<T>(string key, IProgress<float> progress = null) where T : UnityEngine.Object
+        public async UniTask<T> LoadAsync<T>(
+            string key,
+            IProgress<float> progress = null,
+            CancellationToken cancellationToken = default
+        ) where T : UnityEngine.Object
         {
             if (_handles.TryGetValue(key, out var boxedHandle) && boxedHandle is AddressableHandle<T> existingHandle)
             {
                 return existingHandle.Asset;
             }
 
-            var newHandle = await AddressableManager.LoadAsync<T>(key, progress);
+            var newHandle = await AddressableManager.LoadAsync<T>(key, progress, cancellationToken);
             _handles[key] = newHandle;
 
             return newHandle.Asset;
