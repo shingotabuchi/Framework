@@ -3,14 +3,12 @@
     "version": "1.0.0",
     "displayName": "Tabuchi Framework",
     "description": "yeaboi",
-    "unity": "2022.3",
-    "keywords": [
-        "shingotabuchi",
-        "shingo",
-        "tabuchi"
-    ],
+    "unity": "6000.0",
     "author": {
         "name": "Shingo Tabuchi",
         "url": "https://github.com/shingotabuchi"
+    },
+    "dependencies": {
+        "com.unity.addressables": "2.4.3"
     }
 }
