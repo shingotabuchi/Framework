@@ -13,15 +13,15 @@ namespace Fwk.Editor
     [InitializeOnLoad]
     public static class AddressableFolderAutoAssign
     {
+        private const string BuildPath = "Assets/AddressableAssetsData/Build";
+        private const string BuildPathMeta = BuildPath + ".meta";
         private const string ResourceFolder = "Assets/AddressableResources";
         private const string DefaultGroupName = "Default Local Group";
         private const string SettingsAssetPath = "Assets/AddressableAssetsData/AddressableAssetSettings.asset";
         private const string SortSettingsAssetPath = "Assets/AddressableAssetsData/AddressableAssetGroupSortSettings.asset";
-        private const string BuildPath = "Assets/AddressableAssetsData/Build";
-        private const string BuildPathMeta = BuildPath + ".meta";
         private const string BuildGroupsPath = BuildPath + "/AssetGroups/";
-        private const string PlayModeSettingsPath = BuildPath + "/AddressableAssetSettings.asset";
-        private const string PlayModeSettingsMetaPath = PlayModeSettingsPath + ".meta";
+        private const string BuildSettingsPath = BuildPath + "/AddressableAssetSettings.asset";
+        private const string BuildSettingsMetaPath = BuildSettingsPath + ".meta";
         private const string BackupSettingsPath = BuildPath + "/AddressableAssetSettings_Backup.asset";
         private const string BackupSortSettingsPath = BuildPath + "/AddressableAssetGroupSortSettings_Backup.asset";
 
@@ -32,7 +32,7 @@ namespace Fwk.Editor
                 if (state == PlayModeStateChange.ExitingEditMode)
                 {
                     BackupOriginalSettings();
-                    PreparePlayModeSettings();
+                    PrepareBuildSettings();
                     AssignAddressables();
                 }
                 else if (state == PlayModeStateChange.ExitingPlayMode)
@@ -42,7 +42,7 @@ namespace Fwk.Editor
             };
         }
 
-        private static void BackupOriginalSettings()
+        public static void BackupOriginalSettings()
         {
             if (File.Exists(SettingsAssetPath))
             {
@@ -71,20 +71,20 @@ namespace Fwk.Editor
             }
         }
 
-        private static void PreparePlayModeSettings()
+        public static void PrepareBuildSettings()
         {
             if (File.Exists(SettingsAssetPath))
             {
-                var buildDir = Path.GetDirectoryName(PlayModeSettingsPath);
+                var buildDir = Path.GetDirectoryName(BuildSettingsPath);
                 if (!Directory.Exists(buildDir))
                 {
                     Directory.CreateDirectory(buildDir);
                 }
 
-                File.Copy(SettingsAssetPath, PlayModeSettingsPath, overwrite: true);
+                File.Copy(SettingsAssetPath, BuildSettingsPath, overwrite: true);
                 AssetDatabase.Refresh();
 
-                var playModeSettings = AssetDatabase.LoadAssetAtPath<AddressableAssetSettings>(PlayModeSettingsPath);
+                var playModeSettings = AssetDatabase.LoadAssetAtPath<AddressableAssetSettings>(BuildSettingsPath);
                 if (playModeSettings != null)
                 {
                     AddressableAssetSettingsDefaultObject.Settings = playModeSettings;
@@ -101,7 +101,7 @@ namespace Fwk.Editor
             }
         }
 
-        private static void RestoreOriginalSettings()
+        public static void RestoreOriginalSettings()
         {
             ClearAddressableFlags();
             if (File.Exists(BackupSettingsPath))
@@ -232,9 +232,21 @@ namespace Fwk.Editor
 
         public void OnPreprocessBuild(BuildReport report)
         {
+            AddressableFolderAutoAssign.BackupOriginalSettings();
+            AddressableFolderAutoAssign.PrepareBuildSettings();
             AddressableFolderAutoAssign.AssignAddressables();
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
+        }
+    }
+
+    public class AddressableFolderAutoAssignPostBuildProcessor : IPostprocessBuildWithReport
+    {
+        public int callbackOrder => 0;
+
+        public void OnPostprocessBuild(BuildReport report)
+        {
+            AddressableFolderAutoAssign.RestoreOriginalSettings();
         }
     }
 }
