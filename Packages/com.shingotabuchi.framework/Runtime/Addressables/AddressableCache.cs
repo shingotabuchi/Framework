@@ -138,11 +138,7 @@ namespace Fwk.Addressables
 
         public void Release(string key)
         {
-            if (TryReleaseHandle(key))
-            {
-                Debug.Log($"Released handle for key '{key}'.");
-            }
-            else
+            if (!TryReleaseHandle(key))
             {
                 Debug.LogWarning($"No handle found for key '{key}'.");
             }
