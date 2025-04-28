@@ -13,13 +13,15 @@ namespace Fwk.Editor
     [InitializeOnLoad]
     public static class AddressableFolderAutoAssign
     {
-        private const string FolderToScan = "Assets/AddressableResources";
+        private const string ResourceFolder = "Assets/AddressableResources";
         private const string DefaultGroupName = "Default Local Group";
         private const string SettingsAssetPath = "Assets/AddressableAssetsData/AddressableAssetSettings.asset";
-        private const string BuildPath = "Assets/AddressableAssetsData/Build/";
-        private const string BuildGroupsPath = BuildPath + "AssetGroups/";
-        private const string PlayModeSettingsPath = BuildPath + "AddressableAssetSettings.asset";
-        private const string BackupSettingsPath = BuildPath + "AddressableAssetSettings_Backup.asset";
+        private const string BuildPath = "Assets/AddressableAssetsData/Build";
+        private const string BuildPathMeta = BuildPath + ".meta";
+        private const string BuildGroupsPath = BuildPath + "/AssetGroups/";
+        private const string PlayModeSettingsPath = BuildPath + "/AddressableAssetSettings.asset";
+        private const string PlayModeSettingsMetaPath = PlayModeSettingsPath + ".meta";
+        private const string BackupSettingsPath = BuildPath + "/AddressableAssetSettings_Backup.asset";
         private const string BackupSettingsMetaPath = BackupSettingsPath + ".meta";
 
         static AddressableFolderAutoAssign()
@@ -84,15 +86,12 @@ namespace Fwk.Editor
 
         private static void RestoreOriginalSettings()
         {
+            ClearAddressableFlags();
             if (File.Exists(BackupSettingsPath))
             {
                 if (File.Exists(SettingsAssetPath))
                 {
                     File.Delete(SettingsAssetPath);
-                }
-                if (File.Exists(BackupSettingsMetaPath))
-                {
-                    File.Delete(BackupSettingsMetaPath);
                 }
 
                 File.Move(BackupSettingsPath, SettingsAssetPath);
@@ -101,6 +100,15 @@ namespace Fwk.Editor
             else
             {
                 Debug.LogWarning("[AddressableFolderAutoAssign] No backup found to restore AddressableAssetSettings.asset.");
+            }
+
+            if (Directory.Exists(BuildPath))
+            {
+                Directory.Delete(BuildPath, true);
+            }
+            if (File.Exists(BuildPathMeta))
+            {
+                File.Delete(BuildPathMeta);
             }
 
             AssetDatabase.Refresh();
@@ -117,22 +125,28 @@ namespace Fwk.Editor
             }
         }
 
-        private static void CleanOldGroupsInBuild()
+        private static void ClearAddressableFlags()
         {
-            if (Directory.Exists(BuildGroupsPath))
-            {
-                var files = Directory.GetFiles(BuildGroupsPath, "*.asset", SearchOption.AllDirectories);
+            var guids = AssetDatabase.FindAssets("", new[] { ResourceFolder });
 
-                foreach (var file in files)
+            foreach (var guid in guids)
+            {
+                var path = AssetDatabase.GUIDToAssetPath(guid);
+                if (AssetDatabase.IsValidFolder(path)) continue;
+
+                var entry = AddressableAssetSettingsDefaultObject.Settings.FindAssetEntry(guid);
+                if (entry != null)
                 {
-                    AssetDatabase.DeleteAsset(file.Replace("\\", "/"));
+                    AddressableAssetSettingsDefaultObject.Settings.RemoveAssetEntry(guid);
                 }
             }
+
+            AddressableAssetSettingsDefaultObject.Settings.SetDirty(AddressableAssetSettings.ModificationEvent.EntryRemoved, null, true);
+            AssetDatabase.SaveAssets();
         }
 
         public static void AssignAddressables()
         {
-            CleanOldGroupsInBuild();
             var settings = AddressableAssetSettingsDefaultObject.Settings;
             if (settings == null)
             {
@@ -143,7 +157,7 @@ namespace Fwk.Editor
             var templateGroup = settings.DefaultGroup;
             var defaultSchemas = templateGroup.Schemas.ToList();
 
-            var guids = AssetDatabase.FindAssets("", new[] { FolderToScan })
+            var guids = AssetDatabase.FindAssets("", new[] { ResourceFolder })
                 .Where(g =>
                 {
                     var p = AssetDatabase.GUIDToAssetPath(g);
@@ -154,7 +168,7 @@ namespace Fwk.Editor
             foreach (var guid in guids)
             {
                 var path = AssetDatabase.GUIDToAssetPath(guid);
-                var rel = path.Substring(FolderToScan.Length).TrimStart('/');
+                var rel = path.Substring(ResourceFolder.Length).TrimStart('/');
                 var slash = rel.IndexOf('/');
                 var groupName = slash >= 0
                     ? rel.Substring(0, slash)
