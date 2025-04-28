@@ -2,6 +2,7 @@ using UnityEditor;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 namespace Fwk.Editor
 {
@@ -30,6 +31,22 @@ namespace Fwk.Editor
             AddressableFolderAutoAssign.RestoreOriginalSettings();
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
+
+            Debug.Log("[AddressablesBuildTool] Addressables Build Completed.");
+        }
+
+        [MenuItem("Tools/Build/Clean Addressables Cache")]
+        public static void CleanAddressablesCache()
+        {
+            Debug.Log("[AddressablesBuildTool] Cleaning Addressables Cache...");
+
+            Addressables.ClearResourceLocators();
+            Caching.ClearCache(); // Clears Unity's asset bundle cache
+            AddressableAssetSettings.CleanPlayerContent(); // Clears built Addressables
+
+            AssetDatabase.Refresh();
+
+            Debug.Log("[AddressablesBuildTool] Addressables Cache Cleaned.");
         }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 using Fwk.Sound;
 using Cysharp.Threading.Tasks;
 
@@ -7,10 +8,17 @@ public class SoundTest : MonoBehaviour
 {
     [SerializeField] SeTestData[] seTestDatas;
     [SerializeField] int seIndex = 0;
+    [SerializeField] Button nextButton;
+    [SerializeField] Button prevButton;
+    [SerializeField] Button playButton;
 
     private void Start()
     {
         SoundManager.Instance.LoadCueSheetAsync("SE").Forget();
+
+        nextButton.onClick.AddListener(NextSe);
+        prevButton.onClick.AddListener(PrevSe);
+        playButton.onClick.AddListener(PlaySe);
     }
 
 #if UNITY_EDITOR
