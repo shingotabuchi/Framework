@@ -6,7 +6,7 @@ namespace Fwk.Editor
 {
     public static class CopyHierarchyPath
     {
-        [MenuItem("GameObject/CopyPath", false, int.MinValue)]
+        [MenuItem("GameObject/Copy Path", false, int.MinValue)]
         private static void CopyPath()
         {
             var active = Selection.activeGameObject;
