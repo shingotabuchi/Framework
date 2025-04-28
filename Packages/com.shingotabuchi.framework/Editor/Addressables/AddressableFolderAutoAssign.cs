@@ -217,7 +217,7 @@ namespace Fwk.Editor
                 }
 
                 var entry = settings.CreateOrMoveEntry(guid, group, false, false);
-                entry.address = Path.GetFileNameWithoutExtension(path);
+                entry.address = path;
             }
 
             settings.SetDirty(AddressableAssetSettings.ModificationEvent.BatchModification, null, true);

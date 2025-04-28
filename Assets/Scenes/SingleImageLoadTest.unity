@@ -709,7 +709,7 @@ MonoBehaviour:
   loadImageButton: {fileID: 269098527}
   imagePrefab: {fileID: 1500223723}
   imageParent: {fileID: 328570075}
-  imageKey: 
+  imageKey: Assets/AddressableResources/Test/doge.jpg
 --- !u!1 &1387489552
 GameObject:
   m_ObjectHideFlags: 0
