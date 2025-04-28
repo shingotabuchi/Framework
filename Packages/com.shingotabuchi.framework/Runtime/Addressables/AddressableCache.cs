@@ -10,6 +10,7 @@ namespace Fwk
     {
         private readonly Dictionary<string, object> _handles = new();
         private readonly Dictionary<string, UniTask> _loadingTasks = new();
+
         public async UniTask<T> LoadAsync<T>(
             string key,
             IProgress<float> progress = null,
@@ -40,6 +41,7 @@ namespace Fwk
                     }
                     catch
                     {
+                        // continue if existing loading task failed
                     }
                     continue;
                 }
@@ -79,9 +81,9 @@ namespace Fwk
             {
                 var newHandle = await AddressableManager.LoadAsync<T>(key, progress, cancellationToken);
 
-                if (_handles.ContainsKey(key))
+                if (TryGetHandle<T>(key, out var existingHandle))
                 {
-                    Debug.LogError($"Key '{key}' already exists in the cache. Releasing loaded handle.");
+                    Debug.LogWarning($"Key '{key}' already exists in the cache. Releasing the new handle.");
                     newHandle.Release();
                 }
                 else
