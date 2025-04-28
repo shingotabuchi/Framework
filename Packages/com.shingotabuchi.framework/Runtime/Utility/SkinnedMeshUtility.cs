@@ -2,7 +2,7 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 
-namespace Fwk
+namespace Fwk.Utility
 {
     public static class SkinnedMeshUtility
     {
