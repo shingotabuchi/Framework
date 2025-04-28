@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-namespace Fwk
+namespace Fwk.Addressables
 {
     public class AddressableHandle<T> where T : UnityEngine.Object
     {
@@ -15,11 +15,13 @@ namespace Fwk
 
         public T Asset => _handle.Result;
 
+        public AsyncOperationStatus Status => _handle.Status;
+
         public void Release()
         {
             if (_handle.IsValid())
             {
-                Addressables.Release(_handle);
+                UnityEngine.AddressableAssets.Addressables.Release(_handle);
             }
         }
     }

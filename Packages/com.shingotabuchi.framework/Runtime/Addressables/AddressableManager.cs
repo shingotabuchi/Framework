@@ -5,7 +5,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using Cysharp.Threading.Tasks;
 
-namespace Fwk
+namespace Fwk.Addressables
 {
     public static class AddressableManager
     {
@@ -15,10 +15,15 @@ namespace Fwk
             CancellationToken cancellationToken = default
         ) where T : UnityEngine.Object
         {
-            var handle = Addressables.LoadAssetAsync<T>(key);
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new ArgumentException("Key cannot be null or empty.", nameof(key));
+            }
 
+            AsyncOperationHandle<T> handle = new();
             try
             {
+                handle = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>(key);
                 while (!handle.IsDone)
                 {
                     progress?.Report(handle.PercentComplete);
@@ -32,7 +37,16 @@ namespace Fwk
             {
                 if (handle.IsValid())
                 {
-                    Addressables.Release(handle);
+                    UnityEngine.AddressableAssets.Addressables.Release(handle);
+                }
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Failed to load addressable asset with key '{key}': {ex}");
+                if (handle.IsValid())
+                {
+                    UnityEngine.AddressableAssets.Addressables.Release(handle);
                 }
                 throw;
             }

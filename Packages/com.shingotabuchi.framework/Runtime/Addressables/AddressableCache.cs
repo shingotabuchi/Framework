@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using Cysharp.Threading.Tasks;
 
-namespace Fwk
+namespace Fwk.Addressables
 {
     public class AddressableCache : IDisposable
     {
@@ -89,16 +90,44 @@ namespace Fwk
 
             async UniTask LoadAsyncInternal()
             {
-                var newHandle = await AddressableManager.LoadAsync<T>(key, progress, linkedCts.Token);
+                try
+                {
+                    var newHandle = await AddressableManager.LoadAsync<T>(key, progress, linkedCts.Token);
 
-                if (TryGetHandle<T>(key, out var existingHandle))
-                {
-                    Debug.LogWarning($"Key '{key}' already exists in the cache. Releasing the new handle.");
-                    newHandle.Release();
+                    if (newHandle.Status != AsyncOperationStatus.Succeeded)
+                    {
+                        Debug.LogError($"Failed to load asset of key '{key}'.");
+                        throw new Exception($"Failed to load asset of key '{key}'.");
+                    }
+
+                    if (TryGetHandle<T>(key, out var existingHandle))
+                    {
+                        Debug.LogWarning($"Key '{key}' already exists in the cache. Releasing the new handle.");
+                        newHandle.Release();
+                    }
+                    else
+                    {
+                        _handles[key] = newHandle;
+                    }
                 }
-                else
+                catch (OperationCanceledException)
                 {
-                    _handles[key] = newHandle;
+                    if (TryGetHandle<T>(key, out var existingHandle))
+                    {
+                        existingHandle.Release();
+                        _handles.Remove(key);
+                    }
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    if (TryGetHandle<T>(key, out var existingHandle))
+                    {
+                        existingHandle.Release();
+                        _handles.Remove(key);
+                    }
+                    Debug.LogError($"Failed to load asset of key '{key}': {ex}");
+                    throw;
                 }
             }
         }
