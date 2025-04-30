@@ -4,18 +4,21 @@ namespace Fwk
 {
     public class Singleton
     {
-        private static Singleton instance = new Singleton();
+        private static Singleton _instance = new Singleton();
 
         public static Singleton Instance
         {
             get
             {
-                return instance;
+                return _instance;
             }
         }
 
-        private Singleton()
+        protected Singleton()
         {
+            if (_instance != null)
+                throw new System.InvalidOperationException("Only one Singleton allowed!");
+            _instance = this;
         }
     }
 
