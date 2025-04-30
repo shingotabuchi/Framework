@@ -1,9 +1,11 @@
 using System;
 using System.Threading;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using Cysharp.Threading.Tasks;
+using UnityAddressables = UnityEngine.AddressableAssets.Addressables;
 
 namespace Fwk.Addressables
 {
@@ -23,7 +25,7 @@ namespace Fwk.Addressables
             AsyncOperationHandle<T> handle = new();
             try
             {
-                handle = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<T>(key);
+                handle = UnityAddressables.LoadAssetAsync<T>(key);
                 while (!handle.IsDone)
                 {
                     progress?.Report(handle.PercentComplete);
@@ -37,7 +39,7 @@ namespace Fwk.Addressables
             {
                 if (handle.IsValid())
                 {
-                    UnityEngine.AddressableAssets.Addressables.Release(handle);
+                    UnityAddressables.Release(handle);
                 }
                 throw;
             }
@@ -46,8 +48,47 @@ namespace Fwk.Addressables
                 Debug.LogError($"Failed to load addressable asset with key '{key}': {ex}");
                 if (handle.IsValid())
                 {
-                    UnityEngine.AddressableAssets.Addressables.Release(handle);
+                    UnityAddressables.Release(handle);
                 }
+                throw;
+            }
+        }
+
+        public static async UniTask<AddressableHandle<IList<T>>> LoadByLabelAsync<T>(
+            string label,
+            IProgress<float> progress = null,
+            CancellationToken cancellationToken = default
+        ) where T : UnityEngine.Object
+        {
+            if (string.IsNullOrEmpty(label))
+                throw new ArgumentException("Label cannot be null or empty.", nameof(label));
+
+            AsyncOperationHandle<IList<T>> handle = default;
+            try
+            {
+                // callback is no-op; MergeMode.Union just means "all assets under this label"
+                handle = UnityAddressables.LoadAssetsAsync<T>(label, _ => { }, UnityAddressables.MergeMode.Union);
+
+                while (!handle.IsDone)
+                {
+                    progress?.Report(handle.PercentComplete);
+                    await UniTask.Yield(cancellationToken);
+                }
+
+                progress?.Report(1f);
+                return new AddressableHandle<IList<T>>(handle);
+            }
+            catch (OperationCanceledException)
+            {
+                if (handle.IsValid())
+                    UnityAddressables.Release(handle);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Failed to load addressables with label '{label}': {ex}");
+                if (handle.IsValid())
+                    UnityAddressables.Release(handle);
                 throw;
             }
         }
