@@ -212,8 +212,14 @@ namespace Fwk.Editor
                     bundleSchema.BundleMode = BundledAssetGroupSchema.BundlePackingMode.PackSeparately;
                 }
 
+                if (!settings.GetLabels().Contains(groupName))
+                {
+                    settings.AddLabel(groupName, postEvent: true);
+                }
+
                 var entry = settings.CreateOrMoveEntry(guid, group, false, false);
                 entry.address = path;
+                entry.SetLabel(groupName, true);
             }
 
             settings.SetDirty(AddressableAssetSettings.ModificationEvent.BatchModification, null, true);
