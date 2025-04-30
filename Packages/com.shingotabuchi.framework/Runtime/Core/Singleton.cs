@@ -13,6 +13,10 @@ namespace Fwk
                 return instance;
             }
         }
+
+        private Singleton()
+        {
+        }
     }
 
     public class Singleton<T> : MonoBehaviour where T : Component
