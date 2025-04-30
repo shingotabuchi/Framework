@@ -1,14 +1,14 @@
 {
-    "name": "com.shingotabuchi.framework",
-    "version": "1.0.0",
-    "displayName": "Tabuchi Framework",
-    "description": "yeaboi",
-    "unity": "6000.0",
-    "author": {
-        "name": "Shingo Tabuchi",
-        "url": "https://github.com/shingotabuchi"
-    },
-    "dependencies": {
-        "com.unity.addressables": "2.4.3"
-    }
+  "name": "com.shingotabuchi.framework",
+  "version": "1.0.0",
+  "displayName": "Tabuchi Framework",
+  "description": "yeaboi",
+  "unity": "6000.0",
+  "author": {
+    "name": "Shingo Tabuchi",
+    "url": "https://github.com/shingotabuchi"
+  },
+  "dependencies": {
+    "com.unity.addressables": "2.4.6"
+  }
 }
