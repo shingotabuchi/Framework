@@ -58,7 +58,7 @@ namespace Fwk.Addressables
             string label,
             IProgress<float> progress = null,
             CancellationToken cancellationToken = default
-        ) where T : UnityEngine.Object
+        )
         {
             if (string.IsNullOrEmpty(label))
                 throw new ArgumentException("Label cannot be null or empty.", nameof(label));
