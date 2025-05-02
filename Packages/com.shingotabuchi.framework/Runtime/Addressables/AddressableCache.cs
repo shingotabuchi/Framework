@@ -31,7 +31,7 @@ namespace Fwk.Addressables
             {
                 if (TryGetHandle(key, out var handle))
                 {
-                    return handle.Asset as T;
+                    return handle.Object as T;
                 }
 
                 if (_loadingTasks.TryGetValue(key, out var loadingTask))
@@ -65,7 +65,7 @@ namespace Fwk.Addressables
 
                 if (TryGetHandle(key, out var loadedHandle))
                 {
-                    return loadedHandle.Asset as T;
+                    return loadedHandle.Object as T;
                 }
                 else
                 {

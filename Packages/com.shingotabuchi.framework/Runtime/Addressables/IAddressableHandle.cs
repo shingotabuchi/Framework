@@ -1,12 +1,13 @@
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace Fwk.Addressables
 {
     public interface IAddressableHandle
     {
-        UnityEngine.Object Asset { get; }
+        Object Object { get; }
+        IReadOnlyList<Object> Objects { get; }
         AsyncOperationStatus Status { get; }
         void Release();
     }
