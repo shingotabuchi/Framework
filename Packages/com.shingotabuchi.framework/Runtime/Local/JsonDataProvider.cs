@@ -4,6 +4,7 @@ namespace Fwk.Local
     {
         private JsonDataManager<T> _dataManager = new JsonDataManager<T>();
         private T _data;
+
         public T GetData()
         {
             if (_data == null)
@@ -12,21 +13,25 @@ namespace Fwk.Local
             }
             return _data;
         }
+
         public T Load()
         {
             _data = _dataManager.Load();
             return _data;
         }
+
         public void Save()
         {
             _dataManager.Save(_data);
         }
-        public void Delete()
+
+        public void DeleteFile()
         {
             _dataManager.Delete();
             _data = null;
         }
-        public bool Exists()
+
+        public bool FileExists()
         {
             return _dataManager.Exists();
         }
