@@ -1,25 +1,15 @@
 using UnityEngine;
+using System;
 
 namespace Fwk
 {
-    public class Singleton
+    public class SingletonGeneric<T> where T : class, new()
     {
-        private static Singleton _instance = new Singleton();
+        protected SingletonGeneric() { }
 
-        public static Singleton Instance
-        {
-            get
-            {
-                return _instance;
-            }
-        }
+        private static readonly Lazy<T> instance = new Lazy<T>(() => new T());
 
-        protected Singleton()
-        {
-            if (_instance != null)
-                throw new System.InvalidOperationException("Only one Singleton allowed!");
-            _instance = this;
-        }
+        public static T Instance { get { return instance.Value; } }
     }
 
     public class Singleton<T> : MonoBehaviour where T : Component
