@@ -2,17 +2,9 @@ namespace Fwk.Local
 {
     public class JsonDataProvider<T> where T : class, new()
     {
+        public T Data => _data;
+        private T _data = new();
         private JsonDataManager<T> _dataManager = new JsonDataManager<T>();
-        private T _data;
-
-        public T GetData()
-        {
-            if (_data == null)
-            {
-                return Load();
-            }
-            return _data;
-        }
 
         public T Load()
         {
