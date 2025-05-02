@@ -1,6 +1,6 @@
 namespace Fwk.Local
 {
-    public class JsonDataProvider<T> : SingletonGeneric<JsonDataProvider<T>> where T : class, new()
+    public class JsonDataProvider<T> where T : class, new()
     {
         private JsonDataManager<T> _dataManager = new JsonDataManager<T>();
         private T _data;

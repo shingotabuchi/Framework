@@ -1,6 +1,6 @@
 namespace Fwk.Local
 {
-    public class LocalDataProvider : JsonDataProvider<LocalDataProvider>
+    public class LocalDataProvider : SingletonGeneric<JsonDataProvider<LocalDataProvider>>
     {
         public LocalData LocalData;
     }
