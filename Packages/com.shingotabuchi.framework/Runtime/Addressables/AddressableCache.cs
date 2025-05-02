@@ -80,7 +80,7 @@ namespace Fwk.Addressables
                 {
                     var newHandle = await AddressableManager.LoadAsync<T>(key, progress, linkedCts.Token);
 
-                    if (newHandle.Status != AsyncOperationStatus.Succeeded)
+                    if (!newHandle.Succeeded)
                     {
                         Debug.LogError($"Failed to load asset of key '{key}'.");
                         throw new Exception($"Failed to load asset of key '{key}'.");

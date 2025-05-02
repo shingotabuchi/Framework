@@ -1,10 +1,9 @@
 using System;
-using System.Threading;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
+using System.Threading;
 using Cysharp.Threading.Tasks;
+using UnityEngine;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityAddressables = UnityEngine.AddressableAssets.Addressables;
 
 namespace Fwk.Addressables
@@ -15,7 +14,8 @@ namespace Fwk.Addressables
             string key,
             IProgress<float> progress = null,
             CancellationToken cancellationToken = default
-        ) where T : UnityEngine.Object
+        )
+            where T : UnityEngine.Object
         {
             if (string.IsNullOrEmpty(key))
             {
@@ -67,7 +67,10 @@ namespace Fwk.Addressables
             try
             {
                 // callback is no-op; MergeMode.Union just means "all assets under this label"
-                handle = UnityAddressables.LoadAssetsAsync<T>(label, _ => { }, UnityAddressables.MergeMode.Union);
+                handle = UnityAddressables.LoadAssetsAsync<T>(
+                    label,
+                    null
+                );
 
                 while (!handle.IsDone)
                 {

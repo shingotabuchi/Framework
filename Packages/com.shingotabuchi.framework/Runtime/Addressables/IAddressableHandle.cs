@@ -8,7 +8,7 @@ namespace Fwk.Addressables
     {
         Object Object { get; }
         IReadOnlyList<Object> Objects { get; }
-        AsyncOperationStatus Status { get; }
+        bool Succeeded { get; }
         void Release();
     }
 }
