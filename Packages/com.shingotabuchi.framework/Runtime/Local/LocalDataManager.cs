@@ -2,7 +2,7 @@ namespace Fwk.Local
 {
     public class LocalDataManager : SingletonGeneric<LocalDataManager>
     {
-        public LocalData LocalData => _provider.LocalData;
+        public LocalData Data => _provider.LocalData;
         private LocalDataProvider _provider = new();
 
         public void Save()
