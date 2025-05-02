@@ -2,17 +2,24 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
-using UnityEngine.ResourceManagement.AsyncOperations;
 using Cysharp.Threading.Tasks;
 
 namespace Fwk.Addressables
 {
-    public class AddressableCache : IDisposable
+    public class AddressableCache : IDisposable, IAssetRequester
     {
         private Dictionary<string, IAddressableHandle> _handles = new();
         private Dictionary<string, UniTask> _loadingTasks = new();
         private CancellationTokenSource _disposeCts = new();
         private bool _isDisposed = false;
+
+        public async UniTask<T> RequestAsset<T>(
+            string key,
+            CancellationToken cancellationToken = default
+        ) where T : UnityEngine.Object
+        {
+            return await LoadAsync<T>(key, cancellationToken);
+        }
 
         public async UniTask<T> LoadAsync<T>(
             string key,
