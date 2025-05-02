@@ -1,6 +1,8 @@
 namespace Fwk.Local
 {
-    public partial class LocalData : JsonDataProvider<LocalData>
+    [System.Serializable]
+    public partial class LocalData
     {
+
     }
 }
