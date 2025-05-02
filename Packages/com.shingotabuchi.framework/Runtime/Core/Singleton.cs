@@ -32,8 +32,9 @@ namespace Fwk
             {
                 Instance = this as T;
             }
-            else
+            else if (Instance != this)
             {
+                Debug.LogWarning($"Singleton of type {typeof(T)} already exists. Destroying duplicate instance.");
                 Destroy(gameObject);
             }
         }
@@ -50,8 +51,9 @@ namespace Fwk
                 Instance = this as T;
                 DontDestroyOnLoad(this);
             }
-            else
+            else if (Instance != this)
             {
+                Debug.LogWarning($"SingletonPersistent of type {typeof(T)} already exists. Destroying duplicate instance.");
                 Destroy(gameObject);
             }
         }
