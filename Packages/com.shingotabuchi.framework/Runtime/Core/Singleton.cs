@@ -24,7 +24,7 @@ namespace Fwk
 
     public class Singleton<T> : MonoBehaviour where T : Component
     {
-        public static T Instance { get; private set; }
+        public static T Instance { get; protected set; }
         public static bool Exists { get => Instance != null; }
         protected virtual void Awake()
         {
@@ -41,7 +41,7 @@ namespace Fwk
 
     public class SingletonPersistent<T> : MonoBehaviour where T : Component
     {
-        public static T Instance { get; private set; }
+        public static T Instance { get; protected set; }
 
         protected virtual void Awake()
         {
