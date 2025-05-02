@@ -4,7 +4,7 @@ namespace Fwk.UI
 {
     public static class ShowAndHideUI
     {
-        public static void HideUI(this GameObject gameObject)
+        public static void UISetVisible(this GameObject gameObject, bool visible, bool changeInteractable = true)
         {
             if (gameObject == null)
             {
@@ -15,12 +15,15 @@ namespace Fwk.UI
             {
                 canvasGroup = gameObject.AddComponent<CanvasGroup>();
             }
-            canvasGroup.interactable = false;
-            canvasGroup.blocksRaycasts = false;
-            canvasGroup.alpha = 0f;
+            if (changeInteractable)
+            {
+                canvasGroup.interactable = visible;
+                canvasGroup.blocksRaycasts = visible;
+            }
+            canvasGroup.alpha = visible ? 1f : 0f;
         }
 
-        public static void ShowUI(this GameObject gameObject)
+        public static void UISetInteractable(this GameObject gameObject, bool interactable)
         {
             if (gameObject == null)
             {
@@ -31,9 +34,8 @@ namespace Fwk.UI
             {
                 canvasGroup = gameObject.AddComponent<CanvasGroup>();
             }
-            canvasGroup.interactable = true;
-            canvasGroup.blocksRaycasts = true;
-            canvasGroup.alpha = 1f;
+            canvasGroup.interactable = interactable;
+            canvasGroup.blocksRaycasts = interactable;
         }
     }
 }
