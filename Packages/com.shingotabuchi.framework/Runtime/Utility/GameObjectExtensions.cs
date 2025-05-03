@@ -25,9 +25,9 @@ public static class GameObjectExtensions
         var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
         foreach (var field in type.GetFields(flags))
         {
-            // // public or marked [SerializeField]
-            // if (field.IsPublic || Attribute.IsDefined(field, typeof(SerializeField)))
-            field.SetValue(copy, field.GetValue(original));
+            // public or marked [SerializeField]
+            if (field.IsPublic || Attribute.IsDefined(field, typeof(SerializeField)))
+                field.SetValue(copy, field.GetValue(original));
         }
 
         return copy as T;
