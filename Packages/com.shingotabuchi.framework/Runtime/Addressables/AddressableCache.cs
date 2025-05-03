@@ -39,6 +39,32 @@ namespace Fwk.Addressables
             }
         }
 
+        public async UniTask Preload<T>(
+            IEnumerable<string> keys,
+            CancellationToken cancellationToken = default,
+            IProgress<float> progress = null
+        ) where T : UnityEngine.Object
+        {
+            if (_isDisposed)
+            {
+                throw new ObjectDisposedException(nameof(AddressableCache));
+            }
+
+            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _disposeCts.Token);
+            var tasks = new List<UniTask>();
+            foreach (var key in keys)
+            {
+                if (TryGetHandle(key, out var handle))
+                {
+                    continue;
+                }
+
+                tasks.Add(LoadAsync<T>(key, linkedCts.Token));
+            }
+
+            await UniTask.WhenAll(tasks);
+        }
+
         public async UniTask<T> LoadAsync<T>(
             string key,
             CancellationToken cancellationToken = default,
