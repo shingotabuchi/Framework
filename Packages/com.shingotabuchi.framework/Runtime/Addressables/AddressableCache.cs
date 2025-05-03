@@ -21,6 +21,24 @@ namespace Fwk.Addressables
             return await LoadAsync<T>(key, cancellationToken);
         }
 
+        public T GetAssetImmediate<T>(string key) where T : UnityEngine.Object
+        {
+            if (_isDisposed)
+            {
+                throw new ObjectDisposedException(nameof(AddressableCache));
+            }
+
+            if (TryGetHandle(key, out var handle))
+            {
+                return handle.Object as T;
+            }
+            else
+            {
+                Debug.LogWarning($"No handle found for key '{key}'. Returning null.");
+                return null;
+            }
+        }
+
         public async UniTask<T> LoadAsync<T>(
             string key,
             CancellationToken cancellationToken = default,

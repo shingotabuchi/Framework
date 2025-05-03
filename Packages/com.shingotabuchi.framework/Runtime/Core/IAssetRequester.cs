@@ -9,5 +9,7 @@ namespace Fwk
             string key,
             CancellationToken cancellationToken = default
         ) where T : UnityEngine.Object;
+
+        T GetAssetImmediate<T>(string key) where T : UnityEngine.Object;
     }
 }
