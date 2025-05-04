@@ -95,6 +95,7 @@ namespace Fwk.Addressables
                     {
                         // continue if existing loading task failed
                     }
+                    await UniTask.Yield();
                     continue;
                 }
 
