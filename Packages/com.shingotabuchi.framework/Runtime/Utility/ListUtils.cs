@@ -12,4 +12,16 @@ public static class ListUtils
             (list[i], list[k]) = (list[k], list[i]);
         }
     }
+
+    public static T GetRandomElement<T>(this IList<T> list)
+    {
+        if (list == null || list.Count == 0)
+        {
+            throw new System.ArgumentException("List is null or empty.");
+        }
+
+        var rng = new System.Random();
+        int index = rng.Next(list.Count);
+        return list[index];
+    }
 }
