@@ -24,16 +24,4 @@ public static class ListUtils
         int index = rng.Next(list.Count);
         return list[index];
     }
-
-    public static T GetRandomElement<T>(this IReadOnlyList<T> list)
-    {
-        if (list == null || list.Count == 0)
-        {
-            throw new System.ArgumentException("List is null or empty.");
-        }
-
-        var rng = new System.Random();
-        int index = rng.Next(list.Count);
-        return list[index];
-    }
 }
