@@ -13,7 +13,7 @@ public static class ListUtils
         }
     }
 
-    public static T GetRandomElement<T>(this IList<T> list)
+    public static T GetRandomElement<T>(this IReadOnlyList<T> list)
     {
         if (list == null || list.Count == 0)
         {
