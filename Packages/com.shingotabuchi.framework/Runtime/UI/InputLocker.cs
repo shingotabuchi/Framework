@@ -23,6 +23,7 @@ namespace Fwk.UI
             base.Awake();
 
             var overlay = new GameObject("InputLockCanvas");
+            overlay.transform.SetParent(transform, false);
             var canvas = overlay.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = int.MaxValue;
