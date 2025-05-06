@@ -168,9 +168,11 @@ namespace Fwk.Editor
                     AddressableAssetSettingsDefaultObject.Settings.RemoveAssetEntry(guid);
                 }
             }
-
-            AddressableAssetSettingsDefaultObject.Settings.SetDirty(AddressableAssetSettings.ModificationEvent.EntryRemoved, null, true);
-            AssetDatabase.SaveAssets();
+            if (guids != null && guids.Length > 0)
+            {
+                AddressableAssetSettingsDefaultObject.Settings.SetDirty(AddressableAssetSettings.ModificationEvent.EntryRemoved, null, true);
+                AssetDatabase.SaveAssets();
+            }
         }
 
         public static void AssignAddressables()
