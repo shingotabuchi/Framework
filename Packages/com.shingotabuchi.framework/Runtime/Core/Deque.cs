@@ -1,0 +1,50 @@
+using System;
+using System.Collections.Generic;
+
+namespace Fwk
+{
+    public class Deque<T>
+    {
+        private LinkedList<T> _list = new LinkedList<T>();
+
+        public int Count => _list.Count;
+
+        public void AddToFront(T item)
+        {
+            _list.AddFirst(item);
+        }
+
+        public void AddToBack(T item)
+        {
+            _list.AddLast(item);
+        }
+
+        public T RemoveFromFront()
+        {
+            if (_list.Count == 0) throw new InvalidOperationException("Deque is empty.");
+            var value = _list.First.Value;
+            _list.RemoveFirst();
+            return value;
+        }
+
+        public T RemoveFromBack()
+        {
+            if (_list.Count == 0) throw new InvalidOperationException("Deque is empty.");
+            var value = _list.Last.Value;
+            _list.RemoveLast();
+            return value;
+        }
+
+        public T PeekFront()
+        {
+            if (_list.Count == 0) throw new InvalidOperationException("Deque is empty.");
+            return _list.First.Value;
+        }
+
+        public T PeekBack()
+        {
+            if (_list.Count == 0) throw new InvalidOperationException("Deque is empty.");
+            return _list.Last.Value;
+        }
+    }
+}
