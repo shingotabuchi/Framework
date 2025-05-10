@@ -46,5 +46,10 @@ namespace Fwk
             if (_list.Count == 0) throw new InvalidOperationException("Deque is empty.");
             return _list.Last.Value;
         }
+
+        public bool Contains(T item)
+        {
+            return _list.Contains(item);
+        }
     }
 }
