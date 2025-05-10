@@ -5,7 +5,7 @@ namespace Fwk
 {
     public class Deque<T>
     {
-        private LinkedList<T> _list = new LinkedList<T>();
+        private readonly LinkedList<T> _list = new();
 
         public int Count => _list.Count;
 
