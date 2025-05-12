@@ -102,7 +102,67 @@ namespace Fwk.Sound
             }
         }
 
-        public void StopBGM()
+        public async UniTask StopBgm(float fadeDuration = 1.0f)
+        {
+            // Wait for any existing crossfade to complete
+            while (_isCrossfading)
+            {
+                await UniTask.Yield();
+            }
+
+            // Cancel any ongoing crossfade
+            _crossfadeCts?.Cancel();
+            _crossfadeCts?.Dispose();
+            _crossfadeCts = new CancellationTokenSource();
+
+            if (fadeDuration <= 0f || (!_audioSource0.isPlaying && !_audioSource1.isPlaying))
+            {
+                // Immediate stop if fade duration is 0 or no audio is playing
+                _audioSource0.Stop();
+                _audioSource1.Stop();
+                return;
+            }
+
+            _isCrossfading = true;
+
+            try
+            {
+                var playingSource0 = _audioSource0.isPlaying ? _audioSource0 : null;
+                var playingSource1 = _audioSource1.isPlaying ? _audioSource1 : null;
+
+                float startTime = Time.time;
+                float startVolume0 = playingSource0 != null ? playingSource0.volume : 0f;
+                float startVolume1 = playingSource1 != null ? playingSource1.volume : 0f;
+
+                while (Time.time - startTime < fadeDuration)
+                {
+                    float t = (Time.time - startTime) / fadeDuration;
+
+                    if (playingSource0 != null)
+                        playingSource0.volume = Mathf.Lerp(startVolume0, 0f, t);
+
+                    if (playingSource1 != null)
+                        playingSource1.volume = Mathf.Lerp(startVolume1, 0f, t);
+
+                    await UniTask.Yield(_crossfadeCts.Token);
+                }
+
+                // Final state
+                _audioSource0.Stop();
+                _audioSource1.Stop();
+            }
+            catch (System.OperationCanceledException)
+            {
+                // Handle cancellation
+            }
+            finally
+            {
+                _isCrossfading = false;
+            }
+        }
+
+        // Immediate stop without fading
+        public void StopBgmImmediate()
         {
             _audioSource0.Stop();
             _audioSource1.Stop();

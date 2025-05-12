@@ -108,20 +108,40 @@ namespace Fwk.Sound
             _playingPlayers[SoundType.BGM].Add(player);
         }
 
-        public void StopBGM(int channel = 0)
+        public async UniTask StopBgm(int channel = 0, float fadeDuration = 1.0f)
         {
             if (_bgmChannels.TryGetValue(channel, out var player))
             {
-                player.StopBGM();
+                await player.StopBgm(fadeDuration);
                 _playingPlayers[SoundType.BGM].Remove(player);
             }
         }
 
-        public void StopAllBGM()
+        public void StopBgmImmediate(int channel = 0)
+        {
+            if (_bgmChannels.TryGetValue(channel, out var player))
+            {
+                player.StopBgmImmediate();
+                _playingPlayers[SoundType.BGM].Remove(player);
+            }
+        }
+
+        public async UniTask StopAllBgm(float fadeDuration = 1.0f)
+        {
+            var tasks = new List<UniTask>();
+            foreach (var player in _playingPlayers[SoundType.BGM])
+            {
+                tasks.Add(player.StopBgm(fadeDuration));
+            }
+            await UniTask.WhenAll(tasks);
+            _playingPlayers[SoundType.BGM].Clear();
+        }
+
+        public void StopAllBgmImmediate()
         {
             foreach (var player in _playingPlayers[SoundType.BGM])
             {
-                player.StopBGM();
+                player.StopBgmImmediate();
             }
             _playingPlayers[SoundType.BGM].Clear();
         }
