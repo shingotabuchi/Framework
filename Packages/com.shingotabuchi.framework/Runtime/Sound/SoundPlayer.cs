@@ -49,6 +49,7 @@ namespace Fwk.Sound
             _currentSoundData = soundData;
             _isPaused = false;
 
+            _audioSource1.Stop();
             _audioSource0.clip = soundData.Clip;
             _audioSource0.volume = soundData.Volume * volume;
             _audioSource0.loop = true;
