@@ -301,6 +301,9 @@ MonoBehaviour:
   nextButton: {fileID: 61036823}
   prevButton: {fileID: 1261879050}
   playButton: {fileID: 1231329184}
+  bgmTestData:
+    soundName: home1
+    volume: 1
 --- !u!1 &776576726
 GameObject:
   m_ObjectHideFlags: 0

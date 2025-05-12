@@ -16,6 +16,7 @@ namespace Fwk.Sound
         private HashSet<string> loadingCueSheets = new();
         private Dictionary<SoundType, HashSet<SoundPlayer>> _players = new();
         private Dictionary<SoundType, HashSet<SoundPlayer>> _playingPlayers = new();
+        private Dictionary<int, SoundPlayer> _bgmChannels = new();
 
         protected override void Awake()
         {
@@ -27,6 +28,9 @@ namespace Fwk.Sound
         {
             _players[SoundType.SE] = new HashSet<SoundPlayer>();
             _players[SoundType.BGM] = new HashSet<SoundPlayer>();
+            _playingPlayers[SoundType.SE] = new HashSet<SoundPlayer>();
+            _playingPlayers[SoundType.BGM] = new HashSet<SoundPlayer>();
+
             CreateNewPlayer(SoundType.SE);
             CreateNewPlayer(SoundType.BGM);
             CreateNewPlayer(SoundType.BGM);
@@ -54,6 +58,82 @@ namespace Fwk.Sound
                 return;
             }
             player.PlayOneShot(soundData, volume);
+        }
+
+        public async UniTask PlayBgm(string soundName, int channel = 0, float volume = 1.0f, float crossfadeDuration = 1.0f)
+        {
+            if (!soundDataDict.ContainsKey(soundName))
+            {
+                Debug.LogWarning($"Sound '{soundName}' not found.");
+                return;
+            }
+
+            var soundData = soundDataDict[soundName];
+            var player = GetOrCreateBGMPlayer(channel);
+            if (player == null)
+            {
+                Debug.LogWarning($"Failed to get or create BGM player for channel {channel}.");
+                return;
+            }
+
+            await player.CrossfadeBgm(soundData, crossfadeDuration, volume);
+            _playingPlayers[SoundType.BGM].Add(player);
+        }
+
+        public void PlayBGMImmediate(string soundName, int channel = 0, float volume = 1.0f)
+        {
+            if (!soundDataDict.ContainsKey(soundName))
+            {
+                Debug.LogWarning($"Sound '{soundName}' not found.");
+                return;
+            }
+
+            var soundData = soundDataDict[soundName];
+            var player = GetOrCreateBGMPlayer(channel);
+            if (player == null)
+            {
+                Debug.LogWarning($"Failed to get or create BGM player for channel {channel}.");
+                return;
+            }
+
+            player.PlayBgm(soundData, volume);
+            _playingPlayers[SoundType.BGM].Add(player);
+        }
+
+        public void StopBGM(int channel = 0)
+        {
+            if (_bgmChannels.TryGetValue(channel, out var player))
+            {
+                player.StopBGM();
+                _playingPlayers[SoundType.BGM].Remove(player);
+            }
+        }
+
+        public void StopAllBGM()
+        {
+            foreach (var player in _playingPlayers[SoundType.BGM])
+            {
+                player.StopBGM();
+            }
+            _playingPlayers[SoundType.BGM].Clear();
+        }
+
+        private SoundPlayer GetOrCreateBGMPlayer(int channel)
+        {
+            if (_bgmChannels.TryGetValue(channel, out var existingPlayer))
+            {
+                return existingPlayer;
+            }
+
+            var availablePlayer = _players[SoundType.BGM].FirstOrDefault(p => !p.IsPlaying);
+            if (availablePlayer == null)
+            {
+                CreateNewPlayer(SoundType.BGM);
+                availablePlayer = _players[SoundType.BGM].Last();
+            }
+
+            _bgmChannels[channel] = availablePlayer;
+            return availablePlayer;
         }
 
         public async UniTask LoadCueSheetAsync(string cueSheetName, CancellationToken cancellationToken = default, IProgress<float> progress = null)

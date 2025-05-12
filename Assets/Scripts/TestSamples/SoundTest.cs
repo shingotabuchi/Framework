@@ -11,10 +11,12 @@ public class SoundTest : MonoBehaviour
     [SerializeField] Button nextButton;
     [SerializeField] Button prevButton;
     [SerializeField] Button playButton;
+    [SerializeField] SeTestData bgmTestData;
 
     private void Start()
     {
         SoundManager.Instance.LoadCueSheetAsync("SE").Forget();
+        SoundManager.Instance.LoadCueSheetAsync("BGM").Forget();
 
         nextButton.onClick.AddListener(NextSe);
         prevButton.onClick.AddListener(PrevSe);
@@ -48,6 +50,14 @@ public class SoundTest : MonoBehaviour
             seTestDatas[seIndex].PlaySe();
         }
     }
+
+#if UNITY_EDITOR
+    [Fwk.Editor.Button]
+#endif
+    public void PlayBgm()
+    {
+        bgmTestData.PlayBgm();
+    }
 }
 
 [Serializable]
@@ -59,5 +69,10 @@ public class SeTestData
     public void PlaySe()
     {
         SoundManager.Instance.PlaySeOneShot(soundName, volume);
+    }
+
+    public void PlayBgm()
+    {
+        SoundManager.Instance.PlayBgm(soundName).Forget();
     }
 }
