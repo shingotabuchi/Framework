@@ -45,6 +45,7 @@ namespace Fwk.Sound
         public void PlayBgm(ISoundData soundData, float volume = 1.0f)
         {
             if (soundData == null || soundData.Clip == null) return;
+            CancelCrossfade();
 
             _currentSoundData = soundData;
             _isPaused = false;
