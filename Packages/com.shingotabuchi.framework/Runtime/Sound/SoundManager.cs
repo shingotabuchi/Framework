@@ -79,7 +79,7 @@ namespace Fwk.Sound
 
             if (crossfadeDuration <= 0f)
             {
-                PlayBGMImmediate(soundName, channel, volume);
+                PlayBgmImmediate(soundName, channel, volume);
                 return;
             }
 
@@ -96,7 +96,7 @@ namespace Fwk.Sound
             _playingPlayers[SoundType.BGM].Add(player);
         }
 
-        public void PlayBGMImmediate(string soundName, int channel = 0, float volume = 1.0f)
+        public void PlayBgmImmediate(string soundName, int channel = 0, float volume = 1.0f)
         {
             if (!soundDataDict.ContainsKey(soundName))
             {
