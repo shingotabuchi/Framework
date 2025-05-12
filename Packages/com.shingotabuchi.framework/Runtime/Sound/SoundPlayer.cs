@@ -90,10 +90,7 @@ namespace Fwk.Sound
 
                 // Final state
                 playingSource.Stop();
-                // _audioSource0.clip = newSoundData.Clip;
-                // _audioSource0.volume = endVolume;
-                // _audioSource0.Play();
-                // _audioSource1.Stop();
+                nonPlayingSource.volume = endVolume;
             }
             catch (System.OperationCanceledException)
             {

@@ -18,6 +18,14 @@ namespace Fwk.Sound
         private Dictionary<SoundType, HashSet<SoundPlayer>> _playingPlayers = new();
         private Dictionary<int, SoundPlayer> _bgmChannels = new();
 
+        public static void CreateIfNotExists()
+        {
+            if (Instance == null)
+            {
+                Instance = new GameObject("SoundManager").AddComponent<SoundManager>();
+            }
+        }
+
         protected override void Awake()
         {
             base.Awake();
