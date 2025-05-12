@@ -58,6 +58,22 @@ public class SoundTest : MonoBehaviour
     {
         bgmTestData.PlayBgm();
     }
+
+#if UNITY_EDITOR
+    [Fwk.Editor.Button]
+#endif
+    public void PauseBgm()
+    {
+        SoundManager.Instance.PauseBgm(0);
+    }
+
+#if UNITY_EDITOR
+    [Fwk.Editor.Button]
+#endif
+    public void ResumeBgm()
+    {
+        SoundManager.Instance.ResumeBgm(0);
+    }
 }
 
 [Serializable]

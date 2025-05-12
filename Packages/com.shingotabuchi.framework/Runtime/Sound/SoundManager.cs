@@ -17,6 +17,7 @@ namespace Fwk.Sound
         private Dictionary<SoundType, HashSet<SoundPlayer>> _players = new();
         private Dictionary<SoundType, HashSet<SoundPlayer>> _playingPlayers = new();
         private Dictionary<int, SoundPlayer> _bgmChannels = new();
+        private Dictionary<int, ISoundData> _pausedBgmInfo = new();
 
         public static void CreateIfNotExists()
         {
@@ -76,6 +77,12 @@ namespace Fwk.Sound
                 return;
             }
 
+            if (crossfadeDuration <= 0f)
+            {
+                PlayBGMImmediate(soundName, channel, volume);
+                return;
+            }
+
             var soundData = soundDataDict[soundName];
             var player = GetOrCreateBGMPlayer(channel);
             if (player == null)
@@ -84,6 +91,7 @@ namespace Fwk.Sound
                 return;
             }
 
+            _pausedBgmInfo.Remove(channel);
             await player.CrossfadeBgm(soundData, crossfadeDuration, volume);
             _playingPlayers[SoundType.BGM].Add(player);
         }
@@ -103,7 +111,7 @@ namespace Fwk.Sound
                 Debug.LogWarning($"Failed to get or create BGM player for channel {channel}.");
                 return;
             }
-
+            _pausedBgmInfo.Remove(channel);
             player.PlayBgm(soundData, volume);
             _playingPlayers[SoundType.BGM].Add(player);
         }
@@ -229,6 +237,178 @@ namespace Fwk.Sound
                 if (soundDataDict.ContainsKey(soundData.Name))
                 {
                     soundDataDict.Remove(soundData.Name);
+                }
+            }
+        }
+
+        public async UniTask PauseBgm(int channel = 0, float fadeDuration = 1.0f)
+        {
+            if (!_bgmChannels.TryGetValue(channel, out var player))
+            {
+                Debug.LogWarning($"No BGM playing on channel {channel} to pause.");
+                return;
+            }
+
+            if (_pausedBgmInfo.ContainsKey(channel))
+            {
+                Debug.LogWarning($"BGM on channel {channel} is already paused.");
+                return;
+            }
+
+            // Store the current sound data and volume for later resuming
+            _pausedBgmInfo[channel] = player.CurrentSoundData;
+
+            // Fade out the sound
+            if (fadeDuration <= 0f)
+            {
+                player.PauseBgmImmediate();
+            }
+            else
+            {
+                await player.PauseBgm(fadeDuration);
+            }
+        }
+
+        public void PauseBgmImmediate(int channel = 0)
+        {
+            if (!_bgmChannels.TryGetValue(channel, out var player))
+            {
+                Debug.LogWarning($"No BGM playing on channel {channel} to pause.");
+                return;
+            }
+
+            // Store the current sound data and volume for later resuming
+            _pausedBgmInfo[channel] = player.CurrentSoundData;
+            player.PauseBgmImmediate();
+        }
+
+        public async UniTask ResumeBgm(int channel = 0, float fadeDuration = 1.0f)
+        {
+            if (!_pausedBgmInfo.TryGetValue(channel, out var pausedInfo))
+            {
+                Debug.LogWarning($"No paused BGM found on channel {channel}.");
+                return;
+            }
+
+            if (!_bgmChannels.TryGetValue(channel, out var player))
+            {
+                Debug.LogWarning($"No BGM player found for channel {channel}.");
+                return;
+            }
+
+            // Clear the paused info after resuming
+            _pausedBgmInfo.Remove(channel);
+
+            // Resume the previously paused sound with fade
+            if (fadeDuration <= 0f)
+            {
+                player.ResumeBgmImmediate();
+            }
+            else
+            {
+                await player.ResumeBgm(fadeDuration);
+            }
+        }
+
+        public void ResumeBgmImmediate(int channel = 0)
+        {
+            if (!_pausedBgmInfo.TryGetValue(channel, out var pausedInfo))
+            {
+                Debug.LogWarning($"No paused BGM found on channel {channel}.");
+                return;
+            }
+
+            if (!_bgmChannels.TryGetValue(channel, out var player))
+            {
+                Debug.LogWarning($"No BGM player found for channel {channel}.");
+                return;
+            }
+
+            player.ResumeBgmImmediate();
+
+            // Clear the paused info after resuming
+            _pausedBgmInfo.Remove(channel);
+        }
+
+        public async UniTask PauseAllBgm(float fadeDuration = 1.0f)
+        {
+            var tasks = new List<UniTask>();
+
+            foreach (var kvp in _bgmChannels)
+            {
+                int channel = kvp.Key;
+                SoundPlayer player = kvp.Value;
+
+                if (player.IsPlaying)
+                {
+                    _pausedBgmInfo[channel] = player.CurrentSoundData;
+
+                    if (fadeDuration <= 0f)
+                    {
+                        player.PauseBgmImmediate();
+                    }
+                    else
+                    {
+                        tasks.Add(player.PauseBgm(fadeDuration));
+                    }
+                }
+            }
+
+            await UniTask.WhenAll(tasks);
+        }
+
+        public void PauseAllBgmImmediate()
+        {
+            foreach (var kvp in _bgmChannels)
+            {
+                int channel = kvp.Key;
+                SoundPlayer player = kvp.Value;
+
+                if (player.IsPlaying)
+                {
+                    _pausedBgmInfo[channel] = player.CurrentSoundData;
+                    player.PauseBgmImmediate();
+                }
+            }
+        }
+
+        public async UniTask ResumeAllBgm(float fadeDuration = 1.0f)
+        {
+            var tasks = new List<UniTask>();
+            var channelsToResume = _pausedBgmInfo.Keys.ToList();
+
+            foreach (var channel in channelsToResume)
+            {
+                if (_bgmChannels.TryGetValue(channel, out var player) &&
+                    _pausedBgmInfo.TryGetValue(channel, out var pausedInfo))
+                {
+                    if (fadeDuration <= 0f)
+                    {
+                        player.ResumeBgmImmediate();
+                    }
+                    else
+                    {
+                        tasks.Add(player.ResumeBgm(fadeDuration));
+                    }
+
+                    _pausedBgmInfo.Remove(channel);
+                }
+            }
+
+            await UniTask.WhenAll(tasks);
+        }
+
+        public void ResumeAllBgmImmediate()
+        {
+            var channelsToResume = _pausedBgmInfo.Keys.ToList();
+
+            foreach (var channel in channelsToResume)
+            {
+                if (_bgmChannels.TryGetValue(channel, out var player) &&
+                    _pausedBgmInfo.TryGetValue(channel, out var pausedInfo))
+                {
+                    player.ResumeBgmImmediate();
+                    _pausedBgmInfo.Remove(channel);
                 }
             }
         }

@@ -11,5 +11,6 @@ namespace Fwk.Sound
         public string Name => _clip.name;
         public AudioClip Clip => _clip;
         public float Volume => _volume;
+        public float PlayedVolume { get; set; } = 1.0f;
     }
 }
