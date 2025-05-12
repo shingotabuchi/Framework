@@ -12,7 +12,6 @@ namespace Fwk.Sound
         private bool _isCrossfading;
         private CancellationTokenSource _crossfadeCts;
         private ISoundData _currentSoundData;
-        private float _pausedTime = 0f;
         private bool _isPaused = false;
 
         public ISoundData CurrentSoundData => _currentSoundData;
@@ -210,9 +209,6 @@ namespace Fwk.Sound
                 var playingSource0 = _audioSource0.isPlaying ? _audioSource0 : null;
                 var playingSource1 = _audioSource1.isPlaying ? _audioSource1 : null;
 
-                // Store the current time position for resuming later
-                _pausedTime = playingSource0 != null ? playingSource0.time : (playingSource1 != null ? playingSource1.time : 0f);
-
                 float startTime = Time.time;
                 float startVolume0 = playingSource0 != null ? playingSource0.volume : 0f;
                 float startVolume1 = playingSource1 != null ? playingSource1.volume : 0f;
@@ -256,9 +252,6 @@ namespace Fwk.Sound
             _isPaused = true;
             CancelCrossfade();
 
-            // Store the current time position for resuming later
-            _pausedTime = _audioSource0.isPlaying ? _audioSource0.time : (_audioSource1.isPlaying ? _audioSource1.time : 0f);
-
             // Pause both audio sources
             if (_audioSource0.isPlaying)
                 _audioSource0.Pause();
@@ -300,19 +293,11 @@ namespace Fwk.Sound
                 // Resume audio sources at the paused position
                 if (pausedSource0 != null)
                 {
-                    if (pausedSource0.clip != null)
-                    {
-                        pausedSource0.time = _pausedTime;
-                    }
                     pausedSource0.volume = 0f;
                     pausedSource0.UnPause();
                 }
                 if (pausedSource1 != null)
                 {
-                    if (pausedSource1.clip != null)
-                    {
-                        pausedSource1.time = _pausedTime;
-                    }
                     pausedSource1.volume = 0f;
                     pausedSource1.UnPause();
                 }
@@ -363,13 +348,11 @@ namespace Fwk.Sound
             // Resume audio sources at the paused position with full volume
             if (_audioSource0.clip != null && !_audioSource0.isPlaying)
             {
-                _audioSource0.time = _pausedTime;
                 _audioSource0.volume = volume;
                 _audioSource0.UnPause();
             }
             if (_audioSource1.clip != null && !_audioSource1.isPlaying)
             {
-                _audioSource1.time = _pausedTime;
                 _audioSource1.volume = volume;
                 _audioSource1.UnPause();
             }
