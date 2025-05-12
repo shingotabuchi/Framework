@@ -110,6 +110,12 @@ namespace Fwk.Sound
 
         public async UniTask StopBgm(int channel = 0, float fadeDuration = 1.0f)
         {
+            if (fadeDuration <= 0f)
+            {
+                StopBgmImmediate(channel);
+                return;
+            }
+
             if (_bgmChannels.TryGetValue(channel, out var player))
             {
                 await player.StopBgm(fadeDuration);
