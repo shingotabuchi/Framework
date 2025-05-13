@@ -12,7 +12,8 @@
       "depth": 0,
       "source": "embedded",
       "dependencies": {
-        "com.unity.addressables": "2.4.6"
+        "com.unity.addressables": "2.4.6",
+        "com.unity.render-pipelines.universal": "17.0.4"
       }
     },
     "com.unity.addressables": {

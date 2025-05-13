@@ -9,6 +9,7 @@
     "url": "https://github.com/shingotabuchi"
   },
   "dependencies": {
-    "com.unity.addressables": "2.4.6"
+    "com.unity.addressables": "2.4.6",
+    "com.unity.render-pipelines.universal": "17.0.4"
   }
 }
