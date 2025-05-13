@@ -9,10 +9,10 @@ EditorBuildSettings:
     path: Assets/Scenes/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
   - enabled: 0
-    path: Assets/Scenes/SingleImageLoadTest.unity
+    path: Assets/Scenes/Tests/SingleImageLoadTest.unity
     guid: a93672586c20646028264a36976dc52a
   - enabled: 1
-    path: Assets/Scenes/SoundTest.unity
+    path: Assets/Scenes/Tests/SoundTest.unity
     guid: 6c5e01aad65c76b4c9c118e2b6f5648b
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: 6391f202eb8fe5e46880534c35f54c38, type: 2}
