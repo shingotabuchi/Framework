@@ -1,7 +1,10 @@
 using System;
 
-public interface IMasterData
+namespace Fwk.Master
 {
-    int Id { get; set; }
-    Type Type { get; }
+    public interface IMasterData
+    {
+        int Id { get; set; }
+        Type Type { get; }
+    }
 }
