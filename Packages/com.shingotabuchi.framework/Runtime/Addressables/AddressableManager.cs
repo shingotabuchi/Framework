@@ -4,6 +4,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.ResourceManagement.ResourceLocations;
 using UnityAddressables = UnityEngine.AddressableAssets.Addressables;
 
 namespace Fwk.Addressables
@@ -94,6 +95,34 @@ namespace Fwk.Addressables
                     UnityAddressables.Release(handle);
                 throw;
             }
+        }
+
+        public static async UniTask<IList<string>> GetKeysByLabel(string label, IProgress<float> progress = null, CancellationToken cancellationToken = default)
+        {
+            var handle = UnityAddressables.LoadResourceLocationsAsync(label);
+            while (!handle.IsDone)
+            {
+                progress?.Report(handle.PercentComplete);
+                await UniTask.Yield(cancellationToken);
+            }
+            progress?.Report(1f);
+
+            var keys = new List<string>();
+            if (handle.Status == AsyncOperationStatus.Succeeded)
+            {
+                var locations = handle.Result;
+                foreach (var location in locations)
+                {
+                    keys.Add(location.PrimaryKey);
+                }
+            }
+            else
+            {
+                throw new Exception($"Failed to load resource locations for label '{label}'");
+            }
+
+            UnityAddressables.Release(handle);
+            return keys;
         }
     }
 }

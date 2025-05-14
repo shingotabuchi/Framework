@@ -24,4 +24,21 @@ public class LabelLoadTest : MonoBehaviour
             Debug.LogError("Failed to load sprites by label.");
         }
     }
+
+#if UNITY_EDITOR
+    [Fwk.Editor.Button]
+#endif
+    private void GetKeysByLabel()
+    {
+        GetKeysByLabelAsync().Forget();
+    }
+
+    private async UniTask GetKeysByLabelAsync()
+    {
+        var keys = await AddressableManager.GetKeysByLabel("Test");
+        foreach (var key in keys)
+        {
+            Debug.Log($"Loaded key: {key}");
+        }
+    }
 }

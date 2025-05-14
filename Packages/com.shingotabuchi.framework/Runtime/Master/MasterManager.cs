@@ -33,7 +33,7 @@ namespace Fwk.Master
                 }
                 if (_isInitializing)
                 {
-                    await UniTask.Yield();
+                    await UniTask.Yield(token);
                     continue;
                 }
                 _isInitializing = true;
