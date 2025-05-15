@@ -1,25 +1,28 @@
-public class StackableView : View
+namespace Fwk.UI
 {
-    public virtual void OnFront()
+    public class StackableView : View
     {
-        Show();
-    }
+        public virtual void OnFront()
+        {
+            Show();
+        }
 
-    public virtual void OnRemoveFromFront()
-    {
-        Hide();
-    }
+        public virtual void OnRemoveFromFront()
+        {
+            Hide();
+        }
 
-    public virtual void OnRemoveFromBack()
-    {
-        Hide();
-    }
+        public virtual void OnRemoveFromBack()
+        {
+            Hide();
+        }
 
-    public virtual void OnAddToFront()
-    {
-    }
+        public virtual void OnAddToFront()
+        {
+        }
 
-    public virtual void OnAddToBack()
-    {
+        public virtual void OnAddToBack()
+        {
+        }
     }
 }
