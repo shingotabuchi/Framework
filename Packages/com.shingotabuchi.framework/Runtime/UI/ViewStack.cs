@@ -18,6 +18,7 @@ namespace Fwk.UI
             var canvas = new GameObject(name + "ViewStackCanvas").AddComponent<Canvas>();
             var canvasScaler = canvas.gameObject.AddComponent<CanvasScaler>();
             canvas.gameObject.AddComponent<GraphicRaycaster>();
+            canvas.gameObject.layer = LayerMask.NameToLayer("UI");
             canvas.transform.SetParent(parent, false);
             canvas.renderMode = settings.RenderMode;
             canvas.worldCamera = CameraManager.Instance.UICamera;
