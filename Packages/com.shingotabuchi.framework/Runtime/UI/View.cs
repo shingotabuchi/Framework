@@ -26,7 +26,7 @@ namespace Fwk.UI
         protected void GetChildViews()
         {
             _childViews.Clear();
-            _childViews.AddRange(GetComponentsInChildren<View>(true));
+            _childViews.AddRange(GetComponentsInChildren<View>());
             _childViews.Remove(this);
         }
 
