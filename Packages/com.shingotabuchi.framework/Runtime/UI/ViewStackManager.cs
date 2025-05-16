@@ -91,6 +91,11 @@ namespace Fwk.UI
 
         public void CreateStack(string stackName, ViewStackSettings settings)
         {
+            if (_stackDict.ContainsKey(stackName))
+            {
+                Debug.LogError($"Stack {stackName} already exists.");
+                return;
+            }
             var stack = new ViewStack(stackName, settings, transform);
             _stackDict.Add(stackName, stack);
         }
