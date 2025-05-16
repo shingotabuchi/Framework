@@ -9,13 +9,14 @@ namespace Fwk.UI
 
         protected virtual void Awake()
         {
-            // GetChildViews();
+            GetChildViews();
         }
 
         protected void GetChildViews()
         {
             _childViews.Clear();
             _childViews.AddRange(GetComponentsInChildren<View>(true));
+            _childViews.Remove(this);
         }
 
         public virtual void Show()
