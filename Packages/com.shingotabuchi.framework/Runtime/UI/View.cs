@@ -9,18 +9,18 @@ namespace Fwk.UI
     public class View : MonoBehaviour
     {
         private readonly List<View> _childViews = new();
-        private CancellationTokenSource _hideCancellationTokenSource = new();
+        private CancellationTokenSource _cancellationTokenSource = new();
 
         protected virtual void Awake()
         {
             GetChildViews();
         }
 
-        public void CancelHide()
+        public void Cancel()
         {
-            _hideCancellationTokenSource.Cancel();
-            _hideCancellationTokenSource.Dispose();
-            _hideCancellationTokenSource = new();
+            _cancellationTokenSource.Cancel();
+            _cancellationTokenSource.Dispose();
+            _cancellationTokenSource = new();
         }
 
         protected void GetChildViews()
@@ -56,11 +56,16 @@ namespace Fwk.UI
         {
         }
 
-        public async UniTask HideWithDelay(float delay)
+        public async UniTask SetActiveWithDelay(float delay, bool active, CancellationToken cancellationToken = default)
         {
-            CancelHide();
-            await UniTask.Delay(TimeSpan.FromSeconds(delay), cancellationToken: _hideCancellationTokenSource.Token);
-            Hide();
+            Cancel();
+            using var linkedCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _cancellationTokenSource.Token);
+            await UniTask.Delay(TimeSpan.FromSeconds(delay), cancellationToken: linkedCancellationTokenSource.Token);
+            if (linkedCancellationTokenSource.IsCancellationRequested)
+            {
+                return;
+            }
+            gameObject.SetActiveFast(active);
         }
     }
 }
