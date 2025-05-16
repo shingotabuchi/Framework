@@ -9,7 +9,7 @@ namespace Fwk.UI
 
         protected virtual void Awake()
         {
-            GetChildViews();
+            // GetChildViews();
         }
 
         protected void GetChildViews()
