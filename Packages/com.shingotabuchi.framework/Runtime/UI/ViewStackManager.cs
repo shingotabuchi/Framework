@@ -93,7 +93,7 @@ namespace Fwk.UI
         {
             if (_stackDict.ContainsKey(stackName))
             {
-                Debug.LogError($"Stack {stackName} already exists.");
+                Debug.Log($"Stack {stackName} already exists.");
                 return;
             }
             var stack = new ViewStack(stackName, settings, transform);
