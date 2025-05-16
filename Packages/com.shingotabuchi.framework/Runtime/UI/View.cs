@@ -1,15 +1,26 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Cysharp.Threading.Tasks;
+using System.Threading;
+using System;
 
 namespace Fwk.UI
 {
     public class View : MonoBehaviour
     {
-        private List<View> _childViews = new List<View>();
+        private readonly List<View> _childViews = new();
+        private CancellationTokenSource _hideCancellationTokenSource = new();
 
         protected virtual void Awake()
         {
             GetChildViews();
+        }
+
+        public void CancelHide()
+        {
+            _hideCancellationTokenSource.Cancel();
+            _hideCancellationTokenSource.Dispose();
+            _hideCancellationTokenSource = new();
         }
 
         protected void GetChildViews()
@@ -24,7 +35,7 @@ namespace Fwk.UI
             gameObject.SetActiveFast(true);
             foreach (var childView in _childViews)
             {
-                childView.Show();
+                childView.OnParentShow();
             }
         }
 
@@ -33,7 +44,7 @@ namespace Fwk.UI
             gameObject.SetActiveFast(false);
             foreach (var childView in _childViews)
             {
-                childView.Hide();
+                childView.OnParentHide();
             }
         }
 
@@ -43,6 +54,13 @@ namespace Fwk.UI
 
         public virtual void OnParentHide()
         {
+        }
+
+        public async UniTask HideWithDelay(float delay)
+        {
+            CancelHide();
+            await UniTask.Delay(TimeSpan.FromSeconds(delay), cancellationToken: _hideCancellationTokenSource.Token);
+            Hide();
         }
     }
 }
