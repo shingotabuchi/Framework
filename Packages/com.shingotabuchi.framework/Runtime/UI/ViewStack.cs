@@ -20,6 +20,7 @@ namespace Fwk.UI
             canvas.gameObject.AddComponent<GraphicRaycaster>();
             canvas.transform.SetParent(parent, false);
             canvas.renderMode = settings.RenderMode;
+            canvas.worldCamera = CameraManager.Instance.UICamera;
             canvas.sortingOrder = settings.SortingOrder;
             canvas.planeDistance = settings.PlaneDistance;
             canvas.vertexColorAlwaysGammaSpace = settings.VertexColorAlwaysGammaSpace;

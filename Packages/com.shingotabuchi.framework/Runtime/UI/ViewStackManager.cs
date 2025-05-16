@@ -58,6 +58,11 @@ namespace Fwk.UI
 
         private async UniTask InitializeInternal(ViewStackSettings defaultStackSettings, CancellationToken token)
         {
+            if (CameraManager.Instance == null)
+            {
+                CameraManager.CreateIfNotExists();
+            }
+
             var keys = await AddressableManager.GetKeysByLabel(_assetLabel, cancellationToken: token);
             foreach (var key in keys)
             {
