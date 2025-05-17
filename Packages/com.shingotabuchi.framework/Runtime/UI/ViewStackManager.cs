@@ -84,6 +84,16 @@ namespace Fwk.UI
             _isInitialized = true;
         }
 
+        public void SetOnNewFrontView(Action<StackableView> onNewFrontView, string stackName = _defaultStackName)
+        {
+            if (!_stackDict.ContainsKey(stackName))
+            {
+                Debug.LogError($"Stack {stackName} not found.");
+                return;
+            }
+            _stackDict[stackName].SetOnNewFrontView(onNewFrontView);
+        }
+
         public void CreateStack(string stackName, ViewStackSettings settings)
         {
             if (_stackDict.ContainsKey(stackName))
