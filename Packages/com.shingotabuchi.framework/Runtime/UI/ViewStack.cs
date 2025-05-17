@@ -32,6 +32,7 @@ namespace Fwk.UI
 
             _aboveBlurCanvas = new GameObject("AboveBlurCanvas").AddComponent<Canvas>();
             _aboveBlurCanvas.gameObject.AddComponent<GraphicRaycaster>();
+            _aboveBlurCanvas.gameObject.layer = LayerMask.NameToLayer("UI");
             _aboveBlurCanvas.transform.SetParent(_canvas.transform, false);
             _aboveBlurCanvas.overrideSorting = true;
             _aboveBlurCanvas.sortingLayerName = settings.AboveBlurSortingLayerName;
