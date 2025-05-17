@@ -11,14 +11,14 @@ namespace Fwk.UI
     {
         private const string _defaultStackName = "Default";
         private const string _defaultAssetLabel = "StackableViews";
-        private AddressableCache _addressableCache;
+        private IAssetRequester _assetRequester;
         private bool _isInitialized = false;
         private bool _isInitializing = false;
         private readonly Dictionary<Type, StackableView> _uiCache = new();
         private readonly Dictionary<string, ViewStack> _stackDict = new();
 
         public async UniTask Initialize(
-            AddressableCache addressableCache,
+            IAssetRequester assetRequester,
             string assetLabel,
             ViewStackSettings defaultStackSettings,
             CancellationToken token)
@@ -37,7 +37,7 @@ namespace Fwk.UI
                 _isInitializing = true;
                 try
                 {
-                    _addressableCache = addressableCache;
+                    _assetRequester = assetRequester;
                     await InitializeInternal(defaultStackSettings, token, assetLabel);
                 }
                 finally
@@ -63,11 +63,11 @@ namespace Fwk.UI
             {
                 Debug.Log(key);
             }
-            await _addressableCache.Preload<GameObject>(keys, token);
+            await _assetRequester.Preload<GameObject>(keys, token);
 
             foreach (var key in keys)
             {
-                var uiAsset = _addressableCache.GetAssetImmediate<GameObject>(key);
+                var uiAsset = _assetRequester.GetAssetImmediate<GameObject>(key);
                 var ui = Instantiate(uiAsset, transform);
                 ui.SetActive(false);
                 var view = ui.GetComponent<StackableView>();

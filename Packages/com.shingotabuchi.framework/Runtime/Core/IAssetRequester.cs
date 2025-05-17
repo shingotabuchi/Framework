@@ -1,5 +1,7 @@
 using Cysharp.Threading.Tasks;
 using System.Threading;
+using System.Collections.Generic;
+using System;
 
 namespace Fwk
 {
@@ -11,5 +13,11 @@ namespace Fwk
         ) where T : UnityEngine.Object;
 
         T GetAssetImmediate<T>(string key) where T : UnityEngine.Object;
+
+        UniTask Preload<T>(
+            IEnumerable<string> keys,
+            CancellationToken cancellationToken = default,
+            IProgress<float> progress = null
+        ) where T : UnityEngine.Object;
     }
 }
