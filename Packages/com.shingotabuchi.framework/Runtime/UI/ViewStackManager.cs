@@ -185,9 +185,9 @@ namespace Fwk.UI
             stack.RemoveFromBack(view);
         }
 
-        public StackableView GetView<T>() where T : StackableView
+        public T GetView<T>() where T : StackableView
         {
-            return _uiCache[typeof(T)];
+            return _uiCache[typeof(T)] as T;
         }
     }
 }
