@@ -40,6 +40,10 @@ public class UIRendererFeature : ScriptableRendererFeature
 
     public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
     {
+        if (renderingData.cameraData.cameraType != CameraType.Game)
+        {
+            return;
+        }
         if (_uiRenderPass == null)
         {
             return;

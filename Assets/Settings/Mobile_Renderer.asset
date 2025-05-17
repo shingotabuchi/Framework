@@ -68,8 +68,8 @@ MonoBehaviour:
   _layerMask:
     serializedVersion: 2
     m_Bits: 96
-  _execblur: 0
-  _execGlassMorphism: 1
+  _execblur: 1
+  _execGlassMorphism: 0
   _blurRate: 1
   _blurWidth: 2
   _blurRenderScale: 0.5
