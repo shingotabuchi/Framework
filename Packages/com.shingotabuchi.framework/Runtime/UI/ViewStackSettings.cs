@@ -6,7 +6,8 @@ namespace Fwk.UI
     public struct ViewStackSettings
     {
         public readonly RenderMode RenderMode;
-        public readonly UnityEngine.UI.CanvasScaler.ScaleMode ScaleMode;
+        public readonly string SortingLayerName;
+        public readonly CanvasScaler.ScaleMode ScaleMode;
         public readonly CanvasScaler.ScreenMatchMode ScreenMatchMode;
         public readonly Vector2 ReferenceResolution;
         public readonly int SortingOrder;
@@ -16,7 +17,8 @@ namespace Fwk.UI
 
         public ViewStackSettings(
             RenderMode renderMode,
-            UnityEngine.UI.CanvasScaler.ScaleMode scaleMode,
+            string sortingLayerName,
+            CanvasScaler.ScaleMode scaleMode,
             CanvasScaler.ScreenMatchMode screenMatchMode,
             Vector2 referenceResolution,
             int sortingOrder,
@@ -26,6 +28,7 @@ namespace Fwk.UI
         )
         {
             RenderMode = renderMode;
+            SortingLayerName = sortingLayerName;
             ScaleMode = scaleMode;
             ScreenMatchMode = screenMatchMode;
             ReferenceResolution = referenceResolution;

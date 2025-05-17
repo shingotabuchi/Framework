@@ -22,6 +22,7 @@ namespace Fwk.UI
             var canvasScaler = canvas.gameObject.AddComponent<CanvasScaler>();
             canvas.gameObject.AddComponent<GraphicRaycaster>();
             canvas.gameObject.layer = LayerMask.NameToLayer("UI");
+            canvas.sortingLayerName = settings.SortingLayerName;
             canvas.transform.SetParent(parent, false);
             canvas.renderMode = settings.RenderMode;
             canvas.worldCamera = CameraManager.Instance.UICamera;
