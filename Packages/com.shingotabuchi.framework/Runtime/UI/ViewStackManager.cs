@@ -61,7 +61,7 @@ namespace Fwk.UI
             var keys = await AddressableManager.GetKeysByLabel(assetLabel, cancellationToken: token);
             foreach (var key in keys)
             {
-                Debug.Log(key);
+                Debug.Log($"Preloding stackable view: {key}");
             }
             await _assetRequester.Preload<GameObject>(keys, token);
 
@@ -102,7 +102,7 @@ namespace Fwk.UI
                 Debug.LogError("ViewStackManager is not initialized.");
                 return null;
             }
-            var view = GetUI<T>();
+            var view = GetView<T>();
             if (view == null)
             {
                 Debug.LogError($"View not found for {typeof(T)}");
@@ -125,7 +125,7 @@ namespace Fwk.UI
                 Debug.LogError("ViewStackManager is not initialized.");
                 return null;
             }
-            var view = GetUI<T>();
+            var view = GetView<T>();
             if (view == null)
             {
                 Debug.LogError($"View not found for {typeof(T)}");
@@ -148,7 +148,7 @@ namespace Fwk.UI
                 Debug.LogError("ViewStackManager is not initialized.");
                 return;
             }
-            var view = GetUI<T>();
+            var view = GetView<T>();
             if (view == null)
             {
                 Debug.LogError($"View not found for {typeof(T)}");
@@ -170,7 +170,7 @@ namespace Fwk.UI
                 Debug.LogError("ViewStackManager is not initialized.");
                 return;
             }
-            var view = GetUI<T>();
+            var view = GetView<T>();
             if (view == null)
             {
                 Debug.LogError($"View not found for {typeof(T)}");
@@ -185,7 +185,7 @@ namespace Fwk.UI
             stack.RemoveFromBack(view);
         }
 
-        private StackableView GetUI<T>() where T : StackableView
+        public StackableView GetView<T>() where T : StackableView
         {
             return _uiCache[typeof(T)];
         }
