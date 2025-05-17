@@ -25,7 +25,7 @@ namespace Fwk.UI
         {
         }
 
-        public virtual void OnCovered<T>() where T : StackableView
+        public virtual void OnCovered(StackableView coveringView)
         {
         }
     }

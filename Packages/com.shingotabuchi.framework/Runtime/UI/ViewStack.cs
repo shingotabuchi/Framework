@@ -39,6 +39,13 @@ namespace Fwk.UI
                 Debug.Log($"View {view} is already in the stack.");
                 return;
             }
+
+            if (_stack.Count > 0)
+            {
+                var lastView = _stack.PeekBack();
+                lastView.OnCovered(view);
+            }
+
             _stack.AddToFront(view);
             Debug.Log($"Added {view} to front of stack.");
 
