@@ -1,17 +1,24 @@
+// ref. https://media.colorfulpalette.co.jp/n/nffc0ece136be
+
+// TODO: RenderGraph対応
+// https://forum.unity.com/threads/introduction-of-render-graph-in-the-universal-render-pipeline-urp.1500833/
+
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+#pragma warning disable CS0618
+#pragma warning disable CS0672
 
 public class UIRenderPass : ScriptableRenderPass
 {
-    private readonly ProfilingSampler _uiBlurBelowSampler = new ProfilingSampler("UIBlurBelow");
-    private readonly ProfilingSampler _uiDefaultSampler = new ProfilingSampler("UIDefault");
-    private readonly ProfilingSampler _uiBlurAboveSampler = new ProfilingSampler("UIBlurAbove");
-    private readonly ProfilingSampler _captureAndBlurSampler = new ProfilingSampler("CaptureAndBlur");
-    private readonly ProfilingSampler _blurSampler = new ProfilingSampler("Blur");
+    private readonly ProfilingSampler _uiBlurBelowSampler = new("UIBlurBelow");
+    private readonly ProfilingSampler _uiDefaultSampler = new("Default");
+    private readonly ProfilingSampler _uiBlurAboveSampler = new("UIBlurAbove");
+    private readonly ProfilingSampler _captureAndBlurSampler = new("CaptureAndBlur");
+    private readonly ProfilingSampler _blurSampler = new("Blur");
 
-    public static class ShaderID
+    private static class ShaderID
     {
         public static readonly int SimpleBlurParams = Shader.PropertyToID("_SimpleBlurParams");
         public static readonly int SourceTex = Shader.PropertyToID("_SourceTex");
@@ -23,12 +30,12 @@ public class UIRenderPass : ScriptableRenderPass
         public static readonly string TemporaryBlurRT3Name = "TemporaryBlurRT3";
     }
 
-    private Material _blurMaterial;
+    private readonly Material _blurMaterial;
     private RenderStateBlock _stateBlock;
     private FilteringSettings _belowFilteringSettings;
     private FilteringSettings _defaultFilteringSettings;
     private FilteringSettings _aboveFilteringSettings;
-    private List<ShaderTagId> _shaderTagIds;
+    private readonly List<ShaderTagId> _shaderTagIds;
 
     private RTHandle _blurCaptureRT;
     private RTHandle _blurTemporaryRT1;
@@ -52,7 +59,8 @@ public class UIRenderPass : ScriptableRenderPass
 
         _defaultFilteringSettings = new FilteringSettings(RenderQueueRange.transparent, layerMask);
         var defaultSortingLayer = (short)SortingLayer.GetLayerValueFromName("Default");
-        _defaultFilteringSettings.sortingLayerRange = new SortingLayerRange(defaultSortingLayer, defaultSortingLayer);
+        _defaultFilteringSettings.sortingLayerRange =
+            new SortingLayerRange(defaultSortingLayer, defaultSortingLayer);
 
         _aboveFilteringSettings = new FilteringSettings(RenderQueueRange.transparent, layerMask);
         var aboveSortingLayer = (short)SortingLayer.GetLayerValueFromName("UIBlurAbove");
@@ -61,10 +69,10 @@ public class UIRenderPass : ScriptableRenderPass
         _stateBlock = new RenderStateBlock();
 
         _shaderTagIds = new List<ShaderTagId>()
-        {
-            new ShaderTagId("UniversalForward"),
-            new ShaderTagId("SRPDefaultUnlit"),
-        };
+            {
+                new ShaderTagId("UniversalForward"),
+                new ShaderTagId("SRPDefaultUnlit"),
+            };
     }
 
     public void Setup(
@@ -81,7 +89,6 @@ public class UIRenderPass : ScriptableRenderPass
         _blurRenderScale = blurRenderScale;
     }
 
-    [System.Obsolete]
     public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
     {
         base.OnCameraSetup(cmd, ref renderingData);
@@ -89,16 +96,20 @@ public class UIRenderPass : ScriptableRenderPass
         // ブラー適用のための一時バッファ確保
         var rtDescriptor = renderingData.cameraData.cameraTargetDescriptor;
         rtDescriptor.depthBufferBits = 0;
-        RenderingUtils.ReAllocateIfNeeded(ref _blurTemporaryRT3, rtDescriptor, FilterMode.Bilinear, TextureWrapMode.Clamp, name: ShaderID.TemporaryBlurRT3Name);
+        RenderingUtils.ReAllocateIfNeeded(ref _blurTemporaryRT3, rtDescriptor, FilterMode.Bilinear,
+            TextureWrapMode.Clamp, name: ShaderID.TemporaryBlurRT3Name);
 
         rtDescriptor.width = (int)(rtDescriptor.width * _blurRenderScale);
         rtDescriptor.height = (int)(rtDescriptor.height * _blurRenderScale);
-        RenderingUtils.ReAllocateIfNeeded(ref _blurTemporaryRT1, rtDescriptor, FilterMode.Bilinear, TextureWrapMode.Clamp, name: ShaderID.TemporaryBlurRT1Name);
-        RenderingUtils.ReAllocateIfNeeded(ref _blurTemporaryRT2, rtDescriptor, FilterMode.Bilinear, TextureWrapMode.Clamp, name: ShaderID.TemporaryBlurRT2Name);
-        RenderingUtils.ReAllocateIfNeeded(ref _blurCaptureRT, rtDescriptor, FilterMode.Bilinear, TextureWrapMode.Clamp, name: ShaderID.BlurCaptureRTName);
+        RenderingUtils.ReAllocateIfNeeded(ref _blurTemporaryRT1, rtDescriptor, FilterMode.Bilinear,
+            TextureWrapMode.Clamp, name: ShaderID.TemporaryBlurRT1Name);
+        RenderingUtils.ReAllocateIfNeeded(ref _blurTemporaryRT2, rtDescriptor, FilterMode.Bilinear,
+            TextureWrapMode.Clamp, name: ShaderID.TemporaryBlurRT2Name);
+        RenderingUtils.ReAllocateIfNeeded(ref _blurCaptureRT, rtDescriptor, FilterMode.Bilinear,
+            TextureWrapMode.Clamp,
+            name: ShaderID.BlurCaptureRTName);
     }
 
-    [System.Obsolete]
     public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
     {
         /*
@@ -109,7 +120,7 @@ public class UIRenderPass : ScriptableRenderPass
             ・この時点のカメラカラーバッファをコピー → ブラー適用
          ・カメラカラーバッファ
             ・DefaultのUI描画 → ブラー適用（全体ブラー有効時に実行） → UIBlurAboveのUI描画
-         
+
          全てのUIはこのパス上で上記のように描画される想定
         */
 
@@ -123,22 +134,24 @@ public class UIRenderPass : ScriptableRenderPass
         DrawingSettings drawingSettings = CreateDrawingSettings(_shaderTagIds, ref renderingData, sortFlags);
         CommandBuffer cmd = CommandBufferPool.Get();
 
-        // UIBlurBelowのUI描画
-        using (new ProfilingScope(cmd, _uiBlurBelowSampler))
-        {
-            // ProfilingScope内でコマンド追加されているのでまず実行、コマンドを空にしておく
-            context.ExecuteCommandBuffer(cmd);
-            cmd.Clear();
-
-            context.DrawRenderers(renderingData.cullResults, ref drawingSettings, ref _belowFilteringSettings, ref _stateBlock);
-        }
-
-        context.ExecuteCommandBuffer(cmd);
-        cmd.Clear();
-
         // グラスモーフィズム（すりガラス）効果有効時、カメラカラーバッファをコピー → 縦横ブラー適用
         if (_isExecGlassMorphism)
         {
+            // UIBlurBelowのUI描画
+            // このレイヤーはグラスモーフィズムが有効の時しか使わない想定
+            using (new ProfilingScope(cmd, _uiBlurBelowSampler))
+            {
+                // ProfilingScope内でコマンド追加されているのでまず実行、コマンドを空にしておく
+                context.ExecuteCommandBuffer(cmd);
+                cmd.Clear();
+
+                context.DrawRenderers(renderingData.cullResults, ref drawingSettings, ref _belowFilteringSettings,
+                    ref _stateBlock);
+            }
+
+            context.ExecuteCommandBuffer(cmd);
+            cmd.Clear();
+
             using (new ProfilingScope(cmd, _captureAndBlurSampler))
             {
                 // ProfilingScope内でコマンド追加されているのでまず実行、コマンドを空にしておく
@@ -147,20 +160,18 @@ public class UIRenderPass : ScriptableRenderPass
 
                 ApplyBlur(
                     cmd,
-                    ref renderingData,
                     cameraColorRT,
                     _blurCaptureRT,
-                    _blurRenderScale,
                     _blurSize,
                     _blurBlendRate);
             }
 
             CoreUtils.SetRenderTarget(cmd, cameraColorRT);
             cmd.SetGlobalTexture(ShaderID.BlurCaptureTex, _blurCaptureRT);
-        }
 
-        context.ExecuteCommandBuffer(cmd);
-        cmd.Clear();
+            context.ExecuteCommandBuffer(cmd);
+            cmd.Clear();
+        }
 
         // DefaultのUI描画
         using (new ProfilingScope(cmd, _uiDefaultSampler))
@@ -169,7 +180,8 @@ public class UIRenderPass : ScriptableRenderPass
             context.ExecuteCommandBuffer(cmd);
             cmd.Clear();
 
-            context.DrawRenderers(renderingData.cullResults, ref drawingSettings, ref _defaultFilteringSettings, ref _stateBlock);
+            context.DrawRenderers(renderingData.cullResults, ref drawingSettings, ref _defaultFilteringSettings,
+                ref _stateBlock);
         }
 
         context.ExecuteCommandBuffer(cmd);
@@ -186,26 +198,26 @@ public class UIRenderPass : ScriptableRenderPass
 
                 ApplyBlur(
                     cmd,
-                    ref renderingData,
                     cameraColorRT,
                     cameraColorRT,
-                    _blurRenderScale,
                     _blurSize,
                     _blurBlendRate);
             }
 
             context.ExecuteCommandBuffer(cmd);
             cmd.Clear();
-        }
 
-        // UIBlurAboveのUI描画
-        using (new ProfilingScope(cmd, _uiBlurAboveSampler))
-        {
-            // ProfilingScope内でコマンド追加されているのでまず実行、コマンドを空にしておく
-            context.ExecuteCommandBuffer(cmd);
-            cmd.Clear();
+            // UIBlurAboveのUI描画
+            // このレイヤーは全体ブラーが有効の時しか使わない想定
+            using (new ProfilingScope(cmd, _uiBlurAboveSampler))
+            {
+                // ProfilingScope内でコマンド追加されているのでまず実行、コマンドを空にしておく
+                context.ExecuteCommandBuffer(cmd);
+                cmd.Clear();
 
-            context.DrawRenderers(renderingData.cullResults, ref drawingSettings, ref _aboveFilteringSettings, ref _stateBlock);
+                context.DrawRenderers(renderingData.cullResults, ref drawingSettings, ref _aboveFilteringSettings,
+                    ref _stateBlock);
+            }
         }
 
         context.ExecuteCommandBuffer(cmd);
@@ -219,10 +231,8 @@ public class UIRenderPass : ScriptableRenderPass
 
     private void ApplyBlur(
         CommandBuffer cmd,
-        ref RenderingData renderingData,
         RTHandle source,
         RTHandle destination,
-        float renderScale,
         float blurSize,
         float blendRate)
     {
@@ -237,7 +247,7 @@ public class UIRenderPass : ScriptableRenderPass
         const int blurPass = 0;
         const int blurFinalPass = 1;
 
-        // ブラー適用し一時バッファに描画
+        // ブラーを適用し一時バッファに描画
         _blurMaterial.SetVector(ShaderID.SimpleBlurParams, blurParams);
         Blitter.BlitCameraTexture(cmd, source, _blurTemporaryRT1, _blurMaterial, blurPass);
         Blitter.BlitCameraTexture(cmd, _blurTemporaryRT1, _blurTemporaryRT2, _blurMaterial, blurFinalPass);
@@ -263,5 +273,12 @@ public class UIRenderPass : ScriptableRenderPass
         _blurTemporaryRT1?.Release();
         _blurTemporaryRT2?.Release();
         _blurTemporaryRT3?.Release();
+        _blurCaptureRT = null;
+        _blurTemporaryRT1 = null;
+        _blurTemporaryRT2 = null;
+        _blurTemporaryRT3 = null;
     }
 }
+
+#pragma warning restore CS0672
+#pragma warning restore CS0618
