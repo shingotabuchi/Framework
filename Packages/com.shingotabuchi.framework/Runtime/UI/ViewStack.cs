@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,6 +8,8 @@ namespace Fwk.UI
     {
         private readonly Canvas _canvas;
         private readonly Deque<StackableView> _stack = new();
+        private Action<StackableView> _onNewFrontView;
+
 
         public ViewStack(string name, ViewStackSettings settings, Transform parent)
         {
@@ -32,6 +35,11 @@ namespace Fwk.UI
             return canvas;
         }
 
+        public void SetOnNewFrontView(Action<StackableView> onNewFrontView)
+        {
+            _onNewFrontView = onNewFrontView;
+        }
+
         public void AddToFront(StackableView view)
         {
             if (_stack.Contains(view))
@@ -49,7 +57,7 @@ namespace Fwk.UI
             _stack.AddToFront(view);
             Debug.Log($"Added {view} to front of stack.");
 
-            view.OnFront();
+            OnNewFrontView(view);
             view.transform.SetParent(_canvas.transform, false);
         }
 
@@ -65,7 +73,7 @@ namespace Fwk.UI
 
             if (_stack.Count == 1)
             {
-                view.OnFront();
+                OnNewFrontView(view);
             }
 
             view.transform.SetParent(_canvas.transform, false);
@@ -86,7 +94,7 @@ namespace Fwk.UI
             if (_stack.Count > 0)
             {
                 var nextView = _stack.PeekFront();
-                nextView.OnFront();
+                OnNewFrontView(nextView);
             }
         }
 
@@ -106,6 +114,18 @@ namespace Fwk.UI
         public void RemoveFromFront()
         {
             _stack.RemoveFromFront();
+
+            if (_stack.Count > 0)
+            {
+                var nextView = _stack.PeekFront();
+                OnNewFrontView(nextView);
+            }
+        }
+
+        private void OnNewFrontView(StackableView view)
+        {
+            _onNewFrontView?.Invoke(view);
+            view.OnFront();
         }
 
         public void RemoveFromBack()
