@@ -31,9 +31,18 @@ namespace Fwk.UI
             canvasScaler.referenceResolution = settings.ReferenceResolution;
 
             _aboveBlurCanvas = new GameObject("AboveBlurCanvas").AddComponent<Canvas>();
+            _aboveBlurCanvas.gameObject.AddComponent<GraphicRaycaster>();
             _aboveBlurCanvas.transform.SetParent(_canvas.transform, false);
-            _aboveBlurCanvas.sortingLayerName = settings.AboveBlurSortingLayerName;
             _aboveBlurCanvas.overrideSorting = true;
+            _aboveBlurCanvas.sortingLayerName = settings.AboveBlurSortingLayerName;
+            _aboveBlurCanvas.sortingOrder = settings.SortingOrder;
+
+            RectTransform rectTransform = _aboveBlurCanvas.GetComponent<RectTransform>();
+            rectTransform.anchorMin = Vector2.zero;
+            rectTransform.anchorMax = Vector2.one;
+            rectTransform.offsetMin = Vector2.zero;
+            rectTransform.offsetMax = Vector2.zero;
+            rectTransform.pivot = new Vector2(0.5f, 0.5f);
         }
 
         public void SetOnNewFrontView(Action<StackableView> onNewFrontView)
