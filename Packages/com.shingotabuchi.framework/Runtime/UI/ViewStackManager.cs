@@ -7,30 +7,25 @@ using System.Threading;
 
 namespace Fwk.UI
 {
-    public class ViewStackManager : SingletonPersistent<ViewStackManager>
+    public class ViewStackManager : MonoBehaviour
     {
         private const string _defaultStackName = "Default";
-        private const string _assetLabel = "StackableViews";
+        private const string _defaultAssetLabel = "StackableViews";
         private readonly AddressableCache _addressableCache = new();
         private bool _isInitialized = false;
         private bool _isInitializing = false;
         private readonly Dictionary<Type, StackableView> _uiCache = new();
         private readonly Dictionary<string, ViewStack> _stackDict = new();
 
-        public static void CreateIfNotExists()
-        {
-            if (Instance == null)
-            {
-                Instance = new GameObject("ViewStackManager").AddComponent<ViewStackManager>();
-            }
-        }
-
         private void OnDestroy()
         {
             _addressableCache.Dispose();
         }
 
-        public async UniTask Initialize(ViewStackSettings defaultStackSettings, CancellationToken token)
+        public async UniTask Initialize(
+            string assetLabel,
+            ViewStackSettings defaultStackSettings,
+            CancellationToken token)
         {
             while (true)
             {
@@ -46,7 +41,7 @@ namespace Fwk.UI
                 _isInitializing = true;
                 try
                 {
-                    await InitializeInternal(defaultStackSettings, token);
+                    await InitializeInternal(defaultStackSettings, token, assetLabel);
                 }
                 finally
                 {
@@ -56,14 +51,17 @@ namespace Fwk.UI
             }
         }
 
-        private async UniTask InitializeInternal(ViewStackSettings defaultStackSettings, CancellationToken token)
+        private async UniTask InitializeInternal(
+            ViewStackSettings defaultStackSettings,
+            CancellationToken token,
+            string assetLabel = _defaultAssetLabel)
         {
             if (CameraManager.Instance == null)
             {
                 CameraManager.CreateIfNotExists();
             }
 
-            var keys = await AddressableManager.GetKeysByLabel(_assetLabel, cancellationToken: token);
+            var keys = await AddressableManager.GetKeysByLabel(assetLabel, cancellationToken: token);
             foreach (var key in keys)
             {
                 Debug.Log(key);
