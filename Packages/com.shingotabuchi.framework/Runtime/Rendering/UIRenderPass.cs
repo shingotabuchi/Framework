@@ -240,6 +240,10 @@ public class UIRenderPass : ScriptableRenderPass
         {
             return;
         }
+        if (blendRate <= float.Epsilon)
+        {
+            return;
+        }
 
         Vector4 blurParams = Vector4.zero;
         blurParams.x = blurSize;
