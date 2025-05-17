@@ -7,33 +7,33 @@ namespace Fwk.UI
     public class ViewStack
     {
         private readonly Canvas _canvas;
+        private readonly Canvas _aboveBlurCanvas;
         private readonly Deque<StackableView> _stack = new();
         private Action<StackableView> _onNewFrontView;
 
 
         public ViewStack(string name, ViewStackSettings settings, Transform parent)
         {
-            _canvas = CreateCanvas(name, settings, parent);
-        }
-
-        private Canvas CreateCanvas(string name, ViewStackSettings settings, Transform parent)
-        {
-            var canvas = new GameObject(name + "ViewStackCanvas").AddComponent<Canvas>();
-            var canvasScaler = canvas.gameObject.AddComponent<CanvasScaler>();
-            canvas.gameObject.AddComponent<GraphicRaycaster>();
-            canvas.gameObject.layer = LayerMask.NameToLayer("UI");
-            canvas.sortingLayerName = settings.SortingLayerName;
-            canvas.transform.SetParent(parent, false);
-            canvas.renderMode = settings.RenderMode;
-            canvas.worldCamera = CameraManager.Instance.UICamera;
-            canvas.sortingOrder = settings.SortingOrder;
-            canvas.planeDistance = settings.PlaneDistance;
-            canvas.vertexColorAlwaysGammaSpace = settings.VertexColorAlwaysGammaSpace;
+            _canvas = new GameObject(name + "ViewStackCanvas").AddComponent<Canvas>();
+            _canvas.transform.SetParent(parent, false);
+            var canvasScaler = _canvas.gameObject.AddComponent<CanvasScaler>();
+            _canvas.gameObject.AddComponent<GraphicRaycaster>();
+            _canvas.gameObject.layer = LayerMask.NameToLayer("UI");
+            _canvas.sortingLayerName = settings.SortingLayerName;
+            _canvas.renderMode = settings.RenderMode;
+            _canvas.worldCamera = CameraManager.Instance.UICamera;
+            _canvas.sortingOrder = settings.SortingOrder;
+            _canvas.planeDistance = settings.PlaneDistance;
+            _canvas.vertexColorAlwaysGammaSpace = settings.VertexColorAlwaysGammaSpace;
             canvasScaler.matchWidthOrHeight = settings.MatchWidthOrHeight;
             canvasScaler.uiScaleMode = settings.ScaleMode;
             canvasScaler.screenMatchMode = settings.ScreenMatchMode;
             canvasScaler.referenceResolution = settings.ReferenceResolution;
-            return canvas;
+
+            _aboveBlurCanvas = new GameObject("AboveBlurCanvas").AddComponent<Canvas>();
+            _aboveBlurCanvas.transform.SetParent(_canvas.transform, false);
+            _aboveBlurCanvas.sortingLayerName = settings.AboveBlurSortingLayerName;
+            _aboveBlurCanvas.overrideSorting = true;
         }
 
         public void SetOnNewFrontView(Action<StackableView> onNewFrontView)

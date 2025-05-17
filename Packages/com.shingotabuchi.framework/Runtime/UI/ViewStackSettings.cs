@@ -7,6 +7,7 @@ namespace Fwk.UI
     {
         public readonly RenderMode RenderMode;
         public readonly string SortingLayerName;
+        public readonly string AboveBlurSortingLayerName;
         public readonly CanvasScaler.ScaleMode ScaleMode;
         public readonly CanvasScaler.ScreenMatchMode ScreenMatchMode;
         public readonly Vector2 ReferenceResolution;
@@ -18,6 +19,7 @@ namespace Fwk.UI
         public ViewStackSettings(
             RenderMode renderMode,
             string sortingLayerName,
+            string aboveBlurSortingLayerName,
             CanvasScaler.ScaleMode scaleMode,
             CanvasScaler.ScreenMatchMode screenMatchMode,
             Vector2 referenceResolution,
@@ -29,6 +31,7 @@ namespace Fwk.UI
         {
             RenderMode = renderMode;
             SortingLayerName = sortingLayerName;
+            AboveBlurSortingLayerName = aboveBlurSortingLayerName;
             ScaleMode = scaleMode;
             ScreenMatchMode = screenMatchMode;
             ReferenceResolution = referenceResolution;
