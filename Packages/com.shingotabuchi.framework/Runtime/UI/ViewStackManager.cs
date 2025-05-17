@@ -11,18 +11,14 @@ namespace Fwk.UI
     {
         private const string _defaultStackName = "Default";
         private const string _defaultAssetLabel = "StackableViews";
-        private readonly AddressableCache _addressableCache = new();
+        private AddressableCache _addressableCache;
         private bool _isInitialized = false;
         private bool _isInitializing = false;
         private readonly Dictionary<Type, StackableView> _uiCache = new();
         private readonly Dictionary<string, ViewStack> _stackDict = new();
 
-        private void OnDestroy()
-        {
-            _addressableCache.Dispose();
-        }
-
         public async UniTask Initialize(
+            AddressableCache addressableCache,
             string assetLabel,
             ViewStackSettings defaultStackSettings,
             CancellationToken token)
@@ -41,6 +37,7 @@ namespace Fwk.UI
                 _isInitializing = true;
                 try
                 {
+                    _addressableCache = addressableCache;
                     await InitializeInternal(defaultStackSettings, token, assetLabel);
                 }
                 finally
