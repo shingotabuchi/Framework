@@ -81,6 +81,7 @@ public class UIRenderPass : ScriptableRenderPass
         _blurRenderScale = blurRenderScale;
     }
 
+    [System.Obsolete]
     public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
     {
         base.OnCameraSetup(cmd, ref renderingData);
@@ -97,6 +98,7 @@ public class UIRenderPass : ScriptableRenderPass
         RenderingUtils.ReAllocateIfNeeded(ref _blurCaptureRT, rtDescriptor, FilterMode.Bilinear, TextureWrapMode.Clamp, name: ShaderID.BlurCaptureRTName);
     }
 
+    [System.Obsolete]
     public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
     {
         /*
