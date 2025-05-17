@@ -206,18 +206,17 @@ public class UIRenderPass : ScriptableRenderPass
 
             context.ExecuteCommandBuffer(cmd);
             cmd.Clear();
+        }
 
-            // UIBlurAboveのUI描画
-            // このレイヤーは全体ブラーが有効の時しか使わない想定
-            using (new ProfilingScope(cmd, _uiBlurAboveSampler))
-            {
-                // ProfilingScope内でコマンド追加されているのでまず実行、コマンドを空にしておく
-                context.ExecuteCommandBuffer(cmd);
-                cmd.Clear();
+        // UIBlurAboveのUI描画
+        using (new ProfilingScope(cmd, _uiBlurAboveSampler))
+        {
+            // ProfilingScope内でコマンド追加されているのでまず実行、コマンドを空にしておく
+            context.ExecuteCommandBuffer(cmd);
+            cmd.Clear();
 
-                context.DrawRenderers(renderingData.cullResults, ref drawingSettings, ref _aboveFilteringSettings,
-                    ref _stateBlock);
-            }
+            context.DrawRenderers(renderingData.cullResults, ref drawingSettings, ref _aboveFilteringSettings,
+                ref _stateBlock);
         }
 
         context.ExecuteCommandBuffer(cmd);
