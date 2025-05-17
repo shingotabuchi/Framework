@@ -24,5 +24,9 @@ namespace Fwk.UI
         public virtual void OnAddToBack()
         {
         }
+
+        public virtual void OnCovered<T>() where T : StackableView
+        {
+        }
     }
 }
