@@ -62,7 +62,7 @@ namespace Fwk.UI
 
             if (_stack.Count > 0)
             {
-                var lastView = _stack.PeekBack();
+                var lastView = _stack.PeekFront();
                 lastView.OnCovered(view);
                 lastView.transform.SetParent(_canvas.transform, false);
             }
