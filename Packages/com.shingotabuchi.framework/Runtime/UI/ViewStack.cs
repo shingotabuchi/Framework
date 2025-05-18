@@ -10,10 +10,11 @@ namespace Fwk.UI
         private readonly Canvas _aboveBlurCanvas;
         private readonly Deque<StackableView> _stack = new();
         private Action<StackableView> _onNewFrontView;
+        private readonly IBlurController _blurController;
 
-
-        public ViewStack(string name, ViewStackSettings settings, Transform parent)
+        public ViewStack(string name, ViewStackSettings settings, Transform parent, IBlurController blurController)
         {
+            _blurController = blurController;
             _canvas = new GameObject(name + "ViewStackCanvas").AddComponent<Canvas>();
             _canvas.transform.SetParent(parent, false);
             var canvasScaler = _canvas.gameObject.AddComponent<CanvasScaler>();
@@ -100,15 +101,7 @@ namespace Fwk.UI
                 return;
             }
 
-            var stackView = _stack.RemoveFromFront();
-            Debug.Log($"Removed {stackView} from front of stack.");
-            stackView.OnRemoveFromFront();
-
-            if (_stack.Count > 0)
-            {
-                var nextView = _stack.PeekFront();
-                OnNewFrontView(nextView);
-            }
+            RemoveFromFront();
         }
 
         public void RemoveFromBack(StackableView view)
@@ -119,14 +112,14 @@ namespace Fwk.UI
                 return;
             }
 
-            var stackView = _stack.RemoveFromBack();
-            Debug.Log($"Removed {stackView} from back of stack.");
-            stackView.OnRemoveFromBack();
+            RemoveFromBack();
         }
 
         public void RemoveFromFront()
         {
-            _stack.RemoveFromFront();
+            var stackView = _stack.RemoveFromFront();
+            Debug.Log($"Removed {stackView} from front of stack.");
+            OnFrontViewRemoved(stackView);
 
             if (_stack.Count > 0)
             {
@@ -135,16 +128,41 @@ namespace Fwk.UI
             }
         }
 
+        public void RemoveFromBack()
+        {
+            bool isFrontView = _stack.Count == 1;
+            var stackView = _stack.RemoveFromBack();
+            Debug.Log($"Removed {stackView} from back of stack.");
+
+            if (isFrontView)
+            {
+                OnFrontViewRemoved(stackView);
+            }
+            else
+            {
+                stackView.OnRemoveFromBack();
+            }
+        }
+
         private void OnNewFrontView(StackableView view)
         {
+            if (view.BlurBackground)
+            {
+                _blurController.Blur();
+            }
             view.transform.SetParent(_aboveBlurCanvas.transform, false);
             _onNewFrontView?.Invoke(view);
             view.OnFront();
         }
 
-        public void RemoveFromBack()
+        private void OnFrontViewRemoved(StackableView view)
         {
-            _stack.RemoveFromBack();
+            if (view.BlurBackground)
+            {
+                _blurController.UnBlur();
+            }
+            view.transform.SetParent(_canvas.transform, false);
+            view.OnRemoveFromFront();
         }
 
         public bool Contains(StackableView view)

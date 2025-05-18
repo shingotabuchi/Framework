@@ -4,6 +4,7 @@ using Fwk.Addressables;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Runtime.CompilerServices;
 
 namespace Fwk.UI
 {
@@ -16,11 +17,13 @@ namespace Fwk.UI
         private bool _isInitializing = false;
         private readonly Dictionary<Type, StackableView> _uiCache = new();
         private readonly Dictionary<string, ViewStack> _stackDict = new();
+        private IBlurController _blurController;
 
         public async UniTask Initialize(
             IAssetRequester assetRequester,
             string assetLabel,
             ViewStackSettings defaultStackSettings,
+            IBlurController blurController,
             CancellationToken token)
         {
             while (true)
@@ -38,6 +41,7 @@ namespace Fwk.UI
                 try
                 {
                     _assetRequester = assetRequester;
+                    _blurController = blurController;
                     await InitializeInternal(defaultStackSettings, token, assetLabel);
                 }
                 finally
@@ -101,7 +105,7 @@ namespace Fwk.UI
                 Debug.Log($"Stack {stackName} already exists.");
                 return;
             }
-            var stack = new ViewStack(stackName, settings, transform);
+            var stack = new ViewStack(stackName, settings, transform, _blurController);
             _stackDict.Add(stackName, stack);
         }
 
