@@ -70,7 +70,6 @@ namespace Fwk.UI
             Debug.Log($"Added {view} to front of stack.");
 
             OnNewFrontView(view);
-            view.transform.SetParent(_aboveBlurCanvas.transform, false);
         }
 
         public void AddToBack(StackableView view)
