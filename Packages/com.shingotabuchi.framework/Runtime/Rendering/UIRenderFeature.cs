@@ -13,6 +13,18 @@ public class UIRendererFeature : ScriptableRendererFeature
     [SerializeField] private bool _debugExecBlur;
     [SerializeField] private bool _debugExecGlassMorphism;
     [SerializeField][Range(0.0f, 1.0f)] private float _debugBlurRate = 1.0f;
+
+    [Fwk.Editor.Button]
+    private void DebugDOBlurRateOn()
+    {
+        this.DOBlurRateOn(0.5f, 1f);
+    }
+
+    [Fwk.Editor.Button]
+    private void DebugDOBlurRateOff()
+    {
+        this.DOBlurRateOff(0.5f, 0f);
+    }
 #endif
 
     [SerializeField][Range(0.5f, 3.0f)] private float _blurWidth = 1.2f;
@@ -29,6 +41,31 @@ public class UIRendererFeature : ScriptableRendererFeature
     public static bool ExistsInstance()
     {
         return Instance != null;
+    }
+
+    /// <summary>
+    /// Gets the current blur rate.
+    /// </summary>
+    public float GetBlurRate()
+    {
+        return _parameter.BlurRate;
+    }
+
+    /// <summary>
+    /// Sets the blur rate value.
+    /// </summary>
+    /// <param name="value">The blur rate value (0-1)</param>
+    public void SetBlurRate(float value)
+    {
+        _parameter.BlurRate = Mathf.Clamp01(value);
+    }
+
+    /// <summary>
+    /// Explicitly sets the ExecBlur flag.
+    /// </summary>
+    public void SetExecBlur(bool value)
+    {
+        _parameter.ExecBlur = value;
     }
 
     public override void Create()
@@ -70,6 +107,7 @@ public class UIRendererFeature : ScriptableRendererFeature
             blurRate = _debugBlurRate;
         }
 #endif
+        // Debug.Log($"SetupRenderPasses {blurRate}");
         _uiRenderPass?.Setup(execBlur, execGlassMorphism, blurRate, _blurWidth, _blurRenderScale);
     }
 
@@ -77,49 +115,11 @@ public class UIRendererFeature : ScriptableRendererFeature
     {
         if (disposing)
         {
-            StopBlur();
-            StopGlassMorphism();
+            _parameter.ExecBlur = false;
+            _parameter.ExecGlassMorphism = false;
+            _parameter.BlurRate = 0f;
             _uiRenderPass?.Dispose();
             Instance = null;
         }
-    }
-
-    public bool IsExecBlur()
-    {
-        return _parameter.ExecBlur;
-    }
-
-    public void ExecBlur(float rate = 1f)
-    {
-        _parameter.ExecBlur = true;
-        ChangeBlurRate(rate);
-    }
-
-    public void StopBlur(float rate = 0f)
-    {
-        _parameter.ExecBlur = false;
-        ChangeBlurRate(rate);
-    }
-
-    public bool IsExecGlassMorphism()
-    {
-        return _parameter.ExecGlassMorphism;
-    }
-
-    public void ExecGlassMorphism(float rate = 1f)
-    {
-        _parameter.ExecGlassMorphism = true;
-        ChangeBlurRate(rate);
-    }
-
-    public void StopGlassMorphism(float rate = 0f)
-    {
-        _parameter.ExecGlassMorphism = false;
-        ChangeBlurRate(rate);
-    }
-
-    public void ChangeBlurRate(float rate)
-    {
-        _parameter.BlurRate = rate;
     }
 }

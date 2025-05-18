@@ -25,8 +25,8 @@ MonoBehaviour:
     probeSamplingDebugTexture: {fileID: 0}
     probeVolumeBlendStatesCS: {fileID: 0}
   m_RendererFeatures:
-  - {fileID: 1914510511195983916}
-  m_RendererFeatureMap: 2c90969a2ab5911a
+  - {fileID: 672846074342853517}
+  m_RendererFeatureMap: 8dcbb891f06d5609
   m_UseNativeRenderPass: 1
   xrSystemData: {fileID: 0}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
@@ -52,6 +52,29 @@ MonoBehaviour:
   m_DepthTextureFormat: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 0
+--- !u!114 &672846074342853517
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c788398806df22141954ad5ef24f6ca2, type: 3}
+  m_Name: UIRendererFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  _layerMask:
+    serializedVersion: 2
+    m_Bits: 32
+  _debugForceChange: 0
+  _debugExecBlur: 0
+  _debugExecGlassMorphism: 0
+  _debugBlurRate: 1
+  _blurWidth: 1.2
+  _blurRenderScale: 0.5
+  _blurShader: {fileID: 4800000, guid: c61b5a61440b96344ba2b3f20287fae3, type: 3}
 --- !u!114 &1914510511195983916
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -68,9 +91,10 @@ MonoBehaviour:
   _layerMask:
     serializedVersion: 2
     m_Bits: 96
-  _execblur: 1
-  _execGlassMorphism: 0
-  _blurRate: 1
+  _debugForceChange: 0
+  _debugExecBlur: 0
+  _debugExecGlassMorphism: 0
+  _debugBlurRate: 1
   _blurWidth: 2
   _blurRenderScale: 0.5
   _blurShader: {fileID: 4800000, guid: c61b5a61440b96344ba2b3f20287fae3, type: 3}
