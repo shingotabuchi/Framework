@@ -63,13 +63,14 @@ namespace Fwk.UI
             {
                 var lastView = _stack.PeekBack();
                 lastView.OnCovered(view);
+                lastView.transform.SetParent(_canvas.transform, false);
             }
 
             _stack.AddToFront(view);
             Debug.Log($"Added {view} to front of stack.");
 
             OnNewFrontView(view);
-            view.transform.SetParent(_canvas.transform, false);
+            view.transform.SetParent(_aboveBlurCanvas.transform, false);
         }
 
         public void AddToBack(StackableView view)
@@ -86,8 +87,10 @@ namespace Fwk.UI
             {
                 OnNewFrontView(view);
             }
-
-            view.transform.SetParent(_canvas.transform, false);
+            else
+            {
+                view.transform.SetParent(_canvas.transform, false);
+            }
         }
 
         public void RemoveFromFront(StackableView view)
@@ -135,6 +138,7 @@ namespace Fwk.UI
 
         private void OnNewFrontView(StackableView view)
         {
+            view.transform.SetParent(_aboveBlurCanvas.transform, false);
             _onNewFrontView?.Invoke(view);
             view.OnFront();
         }
