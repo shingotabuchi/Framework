@@ -9,6 +9,15 @@ namespace Fwk.UI
         private RectTransform panel;
         private Rect lastSafeArea = new Rect(0, 0, 0, 0);
 
+        private void Awake()
+        {
+            if (panel == null)
+            {
+                panel = GetComponent<RectTransform>();
+            }
+            ApplySafeArea(Screen.safeArea);
+        }
+
         void ApplySafeArea(Rect area)
         {
             if (panel == null)
@@ -30,27 +39,27 @@ namespace Fwk.UI
             lastSafeArea = area;
         }
 
-        void Update()
-        {
-            Rect safeArea = Screen.safeArea;
-            // #if UNITY_EDITOR
-            //             if (Screen.width == 1125 && Screen.height == 2436)
-            //             {
-            //                 safeArea.y = 102;
-            //                 safeArea.height = 2202;
-            //             }
-            //             if (Screen.width == 2436 && Screen.height == 1125)
-            //             {
-            //                 safeArea.x = 132;
-            //                 safeArea.y = 63;
-            //                 safeArea.height = 1062;
-            //                 safeArea.width = 2172;
-            //             }
-            // #endif
-            if (safeArea != lastSafeArea)
-            {
-                ApplySafeArea(safeArea);
-            }
-        }
+        // void Update()
+        // {
+        //     Rect safeArea = Screen.safeArea;
+        //     // #if UNITY_EDITOR
+        //     //             if (Screen.width == 1125 && Screen.height == 2436)
+        //     //             {
+        //     //                 safeArea.y = 102;
+        //     //                 safeArea.height = 2202;
+        //     //             }
+        //     //             if (Screen.width == 2436 && Screen.height == 1125)
+        //     //             {
+        //     //                 safeArea.x = 132;
+        //     //                 safeArea.y = 63;
+        //     //                 safeArea.height = 1062;
+        //     //                 safeArea.width = 2172;
+        //     //             }
+        //     // #endif
+        //     if (safeArea != lastSafeArea)
+        //     {
+        //         ApplySafeArea(safeArea);
+        //     }
+        // }
     }
 }
