@@ -179,5 +179,16 @@ namespace Fwk.UI
         {
             return _stack.PeekBack();
         }
+
+        public void SetFrontViewBelowBlur()
+        {
+            if (_stack.Count == 0)
+            {
+                return;
+            }
+
+            var frontView = _stack.PeekFront();
+            frontView.transform.SetParent(_canvas.transform, false);
+        }
     }
 }
