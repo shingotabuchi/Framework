@@ -190,5 +190,16 @@ namespace Fwk.UI
             var frontView = _stack.PeekFront();
             frontView.transform.SetParent(_canvas.transform, false);
         }
+
+        public void SetFrontViewAboveBlur()
+        {
+            if (_stack.Count == 0)
+            {
+                return;
+            }
+
+            var frontView = _stack.PeekFront();
+            frontView.transform.SetParent(_aboveBlurCanvas.transform, false);
+        }
     }
 }

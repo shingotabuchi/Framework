@@ -214,5 +214,16 @@ namespace Fwk.UI
             var stack = _stackDict[stackName];
             stack.SetFrontViewBelowBlur();
         }
+
+        public void SetFrontViewAboveBlur(string stackName = _defaultStackName)
+        {
+            if (!_isInitialized)
+            {
+                Debug.LogError("ViewStackManager is not initialized.");
+                return;
+            }
+            var stack = _stackDict[stackName];
+            stack.SetFrontViewAboveBlur();
+        }
     }
 }
