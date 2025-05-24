@@ -2,6 +2,7 @@ namespace Fwk.UI
 {
     public class StackableView : View
     {
+        public bool IsAboveBlur { get; set; } = false;
         public virtual bool BlurBackground { get; } = false;
 
         public virtual void OnFront()

@@ -64,7 +64,7 @@ namespace Fwk.UI
             {
                 var lastView = _stack.PeekFront();
                 lastView.OnCovered(view);
-                lastView.transform.SetParent(_canvas.transform, false);
+                PutViewBelowBlur(lastView);
             }
 
             _stack.AddToFront(view);
@@ -89,7 +89,7 @@ namespace Fwk.UI
             }
             else
             {
-                view.transform.SetParent(_canvas.transform, false);
+                PutViewBelowBlur(view);
             }
         }
 
@@ -150,7 +150,7 @@ namespace Fwk.UI
             {
                 _blurController.Blur();
             }
-            view.transform.SetParent(_aboveBlurCanvas.transform, false);
+            PutViewAboveBlur(view);
             _onNewFrontView?.Invoke(view);
             view.OnFront();
         }
@@ -161,7 +161,7 @@ namespace Fwk.UI
             {
                 _blurController.UnBlur();
             }
-            view.transform.SetParent(_canvas.transform, false);
+            PutViewBelowBlur(view);
             view.OnRemoveFromFront();
         }
 
@@ -188,7 +188,7 @@ namespace Fwk.UI
             }
 
             var frontView = _stack.PeekFront();
-            frontView.transform.SetParent(_canvas.transform, false);
+            PutViewBelowBlur(frontView);
         }
 
         public void SetFrontViewAboveBlur()
@@ -199,7 +199,19 @@ namespace Fwk.UI
             }
 
             var frontView = _stack.PeekFront();
-            frontView.transform.SetParent(_aboveBlurCanvas.transform, false);
+            PutViewAboveBlur(frontView);
+        }
+
+        private void PutViewAboveBlur(StackableView view)
+        {
+            view.IsAboveBlur = true;
+            view.transform.SetParent(_aboveBlurCanvas.transform, false);
+        }
+
+        private void PutViewBelowBlur(StackableView view)
+        {
+            view.IsAboveBlur = false;
+            view.transform.SetParent(_canvas.transform, false);
         }
     }
 }
