@@ -1,7 +1,6 @@
 using UnityEditor;
 using UnityEngine;
 using Fwk.Master;
-using System;
 
 namespace Fwk.Editor
 {
