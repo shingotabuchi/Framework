@@ -1,8 +1,6 @@
 using UnityEditor;
 using UnityEditor.AddressableAssets.Settings;
-using UnityEditor.AddressableAssets;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 
 namespace Fwk.Editor
 {
@@ -40,7 +38,7 @@ namespace Fwk.Editor
         {
             Debug.Log("[AddressablesBuildTool] Cleaning Addressables Cache...");
 
-            Addressables.ClearResourceLocators();
+            UnityEngine.AddressableAssets.Addressables.ClearResourceLocators();
             Caching.ClearCache(); // Clears Unity's asset bundle cache
             AddressableAssetSettings.CleanPlayerContent(); // Clears built Addressables
 
