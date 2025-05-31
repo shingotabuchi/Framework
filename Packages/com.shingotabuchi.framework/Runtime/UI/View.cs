@@ -65,7 +65,7 @@ namespace Fwk.UI
             {
                 return;
             }
-            if (gameObject == null)
+            if (this == null)
             {
                 return;
             }
