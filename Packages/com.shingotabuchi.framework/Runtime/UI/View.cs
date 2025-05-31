@@ -65,6 +65,10 @@ namespace Fwk.UI
             {
                 return;
             }
+            if (gameObject == null)
+            {
+                return;
+            }
             gameObject.SetActiveFast(active);
         }
     }
