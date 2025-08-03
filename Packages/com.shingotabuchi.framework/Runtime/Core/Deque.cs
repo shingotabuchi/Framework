@@ -1,9 +1,10 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Fwk
 {
-    public class Deque<T>
+    public class Deque<T> : IEnumerable<T>
     {
         private readonly LinkedList<T> _list = new();
 
@@ -50,6 +51,16 @@ namespace Fwk
         public bool Contains(T item)
         {
             return _list.Contains(item);
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return _list.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

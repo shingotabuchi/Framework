@@ -31,5 +31,9 @@ namespace Fwk.UI
         public virtual void OnCovered(StackableView coveringView)
         {
         }
+
+        public virtual void UpdateViewLoop(float deltaTime)
+        {
+        }
     }
 }

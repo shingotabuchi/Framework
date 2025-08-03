@@ -4,7 +4,6 @@ using Fwk.Addressables;
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Runtime.CompilerServices;
 
 namespace Fwk.UI
 {
@@ -16,6 +15,8 @@ namespace Fwk.UI
         private bool _isInitialized = false;
         private bool _isInitializing = false;
         private readonly Dictionary<Type, StackableView> _uiCache = new();
+        private readonly Dictionary<Type, GameObject> _uiPrefabCache = new();
+        private readonly Dictionary<Type, Queue<StackableView>> _poolCache = new();
         private readonly Dictionary<string, ViewStack> _stackDict = new();
         private IBlurController _blurController;
 
@@ -52,6 +53,14 @@ namespace Fwk.UI
             }
         }
 
+        public void UpdateViewLoop(float deltaTime)
+        {
+            foreach (var stack in _stackDict.Values)
+            {
+                stack.UpdateViewLoop(deltaTime);
+            }
+        }
+
         private async UniTask InitializeInternal(
             ViewStackSettings defaultStackSettings,
             CancellationToken token,
@@ -82,6 +91,7 @@ namespace Fwk.UI
                 }
                 var type = view.GetType();
                 _uiCache.Add(type, view);
+                _uiPrefabCache.Add(type, uiAsset);
             }
 
             CreateStack(_defaultStackName, defaultStackSettings);
@@ -116,18 +126,14 @@ namespace Fwk.UI
                 Debug.LogError("ViewStackManager is not initialized.");
                 return null;
             }
-            var view = GetView<T>();
+            
+            var view = GetOrCreateView<T>();
             if (view == null)
             {
                 Debug.LogError($"View not found for {typeof(T)}");
                 return null;
             }
             var stack = _stackDict[stackName];
-            if (stack.Contains(view))
-            {
-                Debug.Log($"View {view} is already in the stack.");
-                return view as T;
-            }
             stack.AddToFront(view);
             return view as T;
         }
@@ -139,18 +145,14 @@ namespace Fwk.UI
                 Debug.LogError("ViewStackManager is not initialized.");
                 return null;
             }
-            var view = GetView<T>();
+            
+            var view = GetOrCreateView<T>();
             if (view == null)
             {
                 Debug.LogError($"View not found for {typeof(T)}");
                 return null;
             }
             var stack = _stackDict[stackName];
-            if (stack.Contains(view))
-            {
-                Debug.Log($"View {view} is already in the stack.");
-                return view as T;
-            }
             stack.AddToBack(view);
             return view as T;
         }
@@ -162,19 +164,29 @@ namespace Fwk.UI
                 Debug.LogError("ViewStackManager is not initialized.");
                 return;
             }
-            var view = GetView<T>();
-            if (view == null)
-            {
-                Debug.LogError($"View not found for {typeof(T)}");
-                return;
-            }
+            
             var stack = _stackDict[stackName];
-            if (stack.PeekFront() != view)
+            var frontView = stack.PeekFront();
+            
+            if (frontView == null)
             {
-                Debug.LogError($"View {view} is not at the front of the stack.");
+                Debug.LogError($"No view at front of stack {stackName}");
                 return;
             }
-            stack.RemoveFromFront(view);
+            
+            if (!(frontView is T))
+            {
+                Debug.LogError($"Front view is not of type {typeof(T)}, it is {frontView.GetType()}");
+                return;
+            }
+            
+            stack.RemoveFromFront(frontView);
+            
+            // For multi-instance views, return to pool instead of destroying
+            if (frontView is IMultiInstanceView)
+            {
+                ReturnToPool(frontView);
+            }
         }
 
         public void RemoveFromBack<T>(string stackName = _defaultStackName) where T : StackableView
@@ -184,24 +196,134 @@ namespace Fwk.UI
                 Debug.LogError("ViewStackManager is not initialized.");
                 return;
             }
-            var view = GetView<T>();
-            if (view == null)
-            {
-                Debug.LogError($"View not found for {typeof(T)}");
-                return;
-            }
+            
             var stack = _stackDict[stackName];
-            if (stack.PeekBack() != view)
+            var backView = stack.PeekBack();
+            
+            if (backView == null)
             {
-                Debug.LogError($"View {view} is not at the back of the stack.");
+                Debug.LogError($"No view at back of stack {stackName}");
                 return;
             }
-            stack.RemoveFromBack(view);
+            
+            if (!(backView is T))
+            {
+                Debug.LogError($"Back view is not of type {typeof(T)}, it is {backView.GetType()}");
+                return;
+            }
+            
+            stack.RemoveFromBack(backView);
+            
+            // For multi-instance views, return to pool instead of destroying
+            if (backView is IMultiInstanceView)
+            {
+                ReturnToPool(backView);
+            }
         }
 
         public T GetView<T>() where T : StackableView
         {
             return _uiCache[typeof(T)] as T;
+        }
+        
+        private T GetOrCreateView<T>() where T : StackableView
+        {
+            var type = typeof(T);
+            
+            // For multi-instance views, use object pool
+            if (typeof(IMultiInstanceView).IsAssignableFrom(type))
+            {
+                return GetFromPool<T>();
+            }
+            
+            // For single-instance views, use cached instance and check if already in stack
+            var cachedView = _uiCache[type] as T;
+            if (cachedView == null)
+            {
+                return null;
+            }
+            
+            // Check if view is already in any stack
+            foreach (var stack in _stackDict.Values)
+            {
+                if (stack.Contains(cachedView))
+                {
+                    Debug.Log($"View {cachedView} is already in a stack.");
+                    return cachedView;
+                }
+            }
+            
+            return cachedView;
+        }
+        
+        private T GetFromPool<T>() where T : StackableView
+        {
+            var type = typeof(T);
+            
+            if (!_poolCache.ContainsKey(type))
+            {
+                _poolCache[type] = new Queue<StackableView>();
+            }
+            
+            var pool = _poolCache[type];
+            
+            // Try to get from pool first
+            if (pool.Count > 0)
+            {
+                var pooledView = pool.Dequeue() as T;
+                if (pooledView != null)
+                {
+                    pooledView.gameObject.SetActive(false);
+                    if (pooledView is IMultiInstanceView multiInstanceView)
+                    {
+                        multiInstanceView.OnTakeFromPool();
+                    }
+                    return pooledView;
+                }
+            }
+            
+            // Create new instance if pool is empty
+            if (!_uiPrefabCache.ContainsKey(type))
+            {
+                Debug.LogError($"Prefab not found for multi-instance view {type}");
+                return null;
+            }
+            
+            var prefab = _uiPrefabCache[type];
+            var newInstance = Instantiate(prefab, transform);
+            newInstance.SetActive(false);
+            var view = newInstance.GetComponent<T>();
+            if (view == null)
+            {
+                Debug.LogError($"View component not found in instantiated prefab for {type}");
+                Destroy(newInstance);
+                return null;
+            }
+            
+            if (view is IMultiInstanceView multiInstanceViewNew)
+            {
+                multiInstanceViewNew.OnTakeFromPool();
+            }
+            
+            return view;
+        }
+        
+        private void ReturnToPool(StackableView view)
+        {
+            if (!(view is IMultiInstanceView multiInstanceView))
+            {
+                return;
+            }
+            
+            var type = view.GetType();
+            if (!_poolCache.ContainsKey(type))
+            {
+                _poolCache[type] = new Queue<StackableView>();
+            }
+            
+            multiInstanceView.OnReturnToPool();
+            view.gameObject.SetActive(false);
+            _poolCache[type].Enqueue(view);
         }
 
         public void SetFrontViewBelowBlur(string stackName = _defaultStackName)

@@ -4,7 +4,7 @@ namespace Fwk.Master
 {
     public interface IMasterData
     {
-        int Id { get; set; }
+        string Id { get; }
         Type Type { get; }
     }
 }

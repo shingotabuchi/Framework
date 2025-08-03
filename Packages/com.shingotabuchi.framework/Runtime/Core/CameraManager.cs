@@ -1,5 +1,7 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
+using System;
 
 namespace Fwk
 {
@@ -7,6 +9,9 @@ namespace Fwk
     {
         public Camera MainCamera { get; private set; }
         public Camera UICamera { get; private set; }
+        public Camera FXCamera { get; private set; }
+
+        private int _fxCount = 0;
 
         protected override void Awake()
         {
@@ -29,9 +34,11 @@ namespace Fwk
         {
             FindAndSetMainCamera();
             FindAndSetUICamera();
+            FindAndSetFXCamera();
             SetCanvasCameras();
             DestroyOtherCameras();
             SetCameraStack();
+            SetFXCameraActive(false);
         }
 
         private void SetCameraStack()
@@ -42,6 +49,11 @@ namespace Fwk
                 if (!mainCameraStack.cameraStack.Contains(UICamera))
                 {
                     mainCameraStack.cameraStack.Add(UICamera);
+                }
+
+                if (!mainCameraStack.cameraStack.Contains(FXCamera))
+                {
+                    mainCameraStack.cameraStack.Add(FXCamera);
                 }
             }
         }
@@ -58,6 +70,10 @@ namespace Fwk
                 if (canvas.worldCamera.gameObject.CompareTag("MainCamera"))
                 {
                     canvas.worldCamera = MainCamera;
+                }
+                else if (canvas.worldCamera.gameObject.CompareTag("FXCamera"))
+                {
+                    canvas.worldCamera = FXCamera;
                 }
                 else
                 {
@@ -93,16 +109,43 @@ namespace Fwk
             }
         }
 
+        private void FindAndSetFXCamera()
+        {
+            if (FXCamera != null)
+            {
+                return;
+            }
+            var fxCameraObject = GameObject.FindWithTag("FXCamera");
+            if (fxCameraObject != null)
+            {
+                FXCamera = fxCameraObject.GetComponent<Camera>();
+                FXCamera.transform.SetParent(transform, false);
+            }
+        }
+
         private void DestroyOtherCameras()
         {
             var foundCameras = FindObjectsByType<Camera>(FindObjectsSortMode.None);
             foreach (var camera in foundCameras)
             {
-                if (camera != MainCamera && camera != UICamera)
+                if (camera != MainCamera && camera != UICamera && camera != FXCamera)
                 {
                     Destroy(camera.gameObject);
                 }
             }
+        }
+
+        public void SetFXCameraActive(bool active)
+        {
+            if (FXCamera != null)
+            {
+                FXCamera.gameObject.SetActive(active);
+            }
+        }
+
+        public UniTask SetFXCameraActiveAsync(bool active, float delay)
+        {
+            return UniTask.Delay(TimeSpan.FromSeconds(delay)).ContinueWith(() => SetFXCameraActive(active));
         }
     }
 }

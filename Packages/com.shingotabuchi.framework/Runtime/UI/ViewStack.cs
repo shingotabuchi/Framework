@@ -47,6 +47,14 @@ namespace Fwk.UI
             rectTransform.pivot = new Vector2(0.5f, 0.5f);
         }
 
+        public void UpdateViewLoop(float deltaTime)
+        {
+            foreach (var view in _stack)
+            {
+                view.UpdateViewLoop(deltaTime);
+            }
+        }
+
         public void SetOnNewFrontView(Action<StackableView> onNewFrontView)
         {
             _onNewFrontView = onNewFrontView;

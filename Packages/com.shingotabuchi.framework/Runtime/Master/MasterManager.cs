@@ -1,6 +1,8 @@
 using System.Threading;
 using System.Collections.Generic;
+using System.Collections;
 using System;
+using System.Linq;
 using Fwk.Addressables;
 using UnityEngine;
 using Cysharp.Threading.Tasks;
@@ -9,7 +11,7 @@ namespace Fwk.Master
 {
     public class MasterManager : SingletonPersistent<MasterManager>
     {
-        private Dictionary<Type, IReadOnlyList<IMasterData>> _masterData = new Dictionary<Type, IReadOnlyList<IMasterData>>();
+        private Dictionary<Type, IReadOnlyList<IMasterData>> _masterData = new();
         private bool _isInitialized = false;
         private bool _isInitializing = false;
 
@@ -69,14 +71,18 @@ namespace Fwk.Master
                 {
                     if (_masterData.ContainsKey(masterDataSO.Type))
                     {
-                        Debug.LogError($"Master data of type {masterDataSO.Type} already exists. Skipping loading.");
+                        var concreteListType = typeof(List<>).MakeGenericType(masterDataSO.Type);
+                        var data = (IList)Activator.CreateInstance(concreteListType);
+                        foreach (var item in _masterData[masterDataSO.Type])
+                        {
+                            data.Add(item);
+                        }
+                        foreach (var item in masterDataSO.Data)
+                        {
+                            data.Add(item);
+                        }
+                        _masterData[masterDataSO.Type] = data as IReadOnlyList<IMasterData>;
                         continue;
-                    }
-
-                    var data = masterDataSO.Data;
-                    for (int i = 0; i < data.Count; i++)
-                    {
-                        data[i].Id = i + 1;
                     }
 
                     _masterData.Add(masterDataSO.Type, masterDataSO.Data);
@@ -100,7 +106,7 @@ namespace Fwk.Master
             return null;
         }
 
-        public T GetMasterDataById<T>(int id) where T : IMasterData
+        public T GetMasterDataById<T>(string id) where T : IMasterData
         {
             var data = GetMasterData<T>();
             if (data == null)
@@ -108,12 +114,17 @@ namespace Fwk.Master
                 Debug.LogError($"Master data of type {typeof(T)} not found.");
                 return default;
             }
-            if (id < 1 || id > data.Count)
+
+            foreach (var item in data)
             {
-                Debug.LogError($"Master data of type {typeof(T)} with id {id} not found.");
-                return default;
+                if (item.Id == id)
+                {
+                    return item;
+                }
             }
-            return data[id - 1];
+
+            Debug.LogError($"Master data of type {typeof(T)} with id {id} not found.");
+            return default;
         }
     }
 }

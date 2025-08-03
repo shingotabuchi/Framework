@@ -65,6 +65,18 @@ namespace Fwk.Addressables
             await UniTask.WhenAll(tasks);
         }
 
+        public bool IsPreloaded(IEnumerable<string> keys)
+        {
+            foreach (var key in keys)
+            {
+                if (!TryGetHandle(key, out var handle))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         public async UniTask<T> LoadAsync<T>(
             string key,
             CancellationToken cancellationToken = default,

@@ -19,7 +19,7 @@ namespace Fwk.UI
             // Start shake when enabled
             shakeTween = transform.DOShakePosition(
                 duration: shakeDuration,
-                strength: shakeStrength,
+                strength: new Vector3(shakeStrength, shakeStrength, 0f),
                 vibrato: shakeVibrato,
                 randomness: shakeRandomness,
                 snapping: shakeSnapping,

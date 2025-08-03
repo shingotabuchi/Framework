@@ -19,5 +19,7 @@ namespace Fwk
             CancellationToken cancellationToken = default,
             IProgress<float> progress = null
         ) where T : UnityEngine.Object;
+
+        bool IsPreloaded(IEnumerable<string> keys);
     }
 }
