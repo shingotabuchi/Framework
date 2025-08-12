@@ -34,6 +34,12 @@ namespace Fwk
             }
         }
 
+        public static bool IsSceneLoaded(string sceneName)
+        {
+            Initialize();
+            return SceneManager.GetSceneByName(sceneName).isLoaded;
+        }
+
         public static async UniTask LoadSceneAsync(
             string sceneName,
             bool additive = false,
